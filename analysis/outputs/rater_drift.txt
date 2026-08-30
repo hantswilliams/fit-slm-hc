@@ -1,0 +1,30 @@
+FIT-SLM-HC Rater Drift (pass 1 -> pass 2, aug28 revision)
+=========================================================
+Tasks scored by both passes: 22
+
+Axis r: 4 disagreements (4 up, 0 down); sign test p=0.125; Bowker chi2=4.0, df=2, p=0.135335
+    T04 Stress detection: 1 -> 2 (up)
+    T10 Biomedical literature CLS (binary): 1 -> 2 (up)
+    T14 Differential diagnosis (DDXPlus): 2 -> 3 (up)
+    T15 Treatment planning: 2 -> 3 (up)
+Axis k: 4 disagreements (4 up, 0 down); sign test p=0.125; Bowker chi2=4.0, df=1, p=0.0455
+    T01 Report labeling: 1 -> 2 (up)
+    T11 Depression detection: 1 -> 2 (up)
+    T12 Suicide detection: 1 -> 2 (up)
+    T13 Impression generation: 1 -> 2 (up)
+Axis o: 0 disagreements (0 up, 0 down); sign test p=1.0; Bowker n/a (no disagreements)
+
+Pooled: 8 disagreements, 8 up, 0 down; exact sign test p = 0.0078
+
+Band movers (axis sum crosses 5/6 between passes):
+    T13 Impression generation: 5 -> 6 (AR 1.2, inside at 0.90)
+    T14 Differential diagnosis (DDXPlus): 5 -> 6 (AR 1.68, inside at 0.90)
+    T15 Treatment planning: 5 -> 6 (AR 1.16, inside at 0.90)
+
+Reading:
+  Every disagreement raised the score on the second (AR-blind) pass.
+  Symmetric noise would scatter in both directions; a pooled 8-0
+  split (p = 0.008) is systematic drift in how the rubric was
+  applied. Kappa cannot see this. The affected boundaries are
+  r 1/2, r 2/3, and k 1/2 - the same boundaries the manuscript
+  already flags as needing sharper rubric language.

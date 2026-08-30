@@ -1,0 +1,180 @@
+{
+  "ar_threshold": 0.9,
+  "stratum_composition": {
+    "slm_favored": {
+      "rows": 14,
+      "trend_eligible": 14
+    },
+    "symmetric": {
+      "rows": 9,
+      "trend_eligible": 7
+    }
+  },
+  "full": {
+    "label": "full (excl. variant + composite)",
+    "n_included": 21,
+    "contingency_2x2": {
+      "axis_sum_le_5": {
+        "inside": 16,
+        "outside": 2
+      },
+      "axis_sum_ge_6": {
+        "inside": 1,
+        "outside": 2
+      }
+    },
+    "fisher_exact": {
+      "p_two_sided": 0.079699,
+      "p_one_sided_less": 0.996992,
+      "p_one_sided_greater": 0.079699
+    },
+    "odds_ratio": {
+      "odds_ratio": 16.0,
+      "ci_lower": 0.9587,
+      "ci_upper": 267.0331,
+      "note": "Woolf 95% CI (uncorrected)"
+    },
+    "cochran_armitage_trend": {
+      "levels": [
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "totals": [
+        4,
+        7,
+        7,
+        1,
+        2
+      ],
+      "inside_counts": [
+        4,
+        6,
+        6,
+        1,
+        0
+      ],
+      "z": -2.3933,
+      "p_two_sided": 0.016698
+    },
+    "mean_ar_by_axis_sum": {
+      "3": 1.155,
+      "4": 1.0329,
+      "5": 1.1471,
+      "6": 1.05,
+      "7": 0.79
+    }
+  },
+  "symmetric_only": {
+    "label": "symmetric adaptation only",
+    "n_included": 7,
+    "contingency_2x2": {
+      "axis_sum_le_5": {
+        "inside": 5,
+        "outside": 2
+      },
+      "axis_sum_ge_6": {
+        "inside": 0,
+        "outside": 0
+      }
+    },
+    "fisher_exact": {
+      "p_two_sided": null,
+      "p_one_sided_less": null,
+      "p_one_sided_greater": null
+    },
+    "odds_ratio": {
+      "odds_ratio": null,
+      "ci_lower": null,
+      "ci_upper": null,
+      "note": "undefined: one row of the 2x2 is empty in this subset"
+    },
+    "cochran_armitage_trend": {
+      "levels": [
+        3,
+        4,
+        5
+      ],
+      "totals": [
+        1,
+        4,
+        2
+      ],
+      "inside_counts": [
+        1,
+        3,
+        1
+      ],
+      "z": -0.9354,
+      "p_two_sided": 0.349575
+    },
+    "mean_ar_by_axis_sum": {
+      "3": 1.03,
+      "4": 0.935,
+      "5": 0.905
+    }
+  },
+  "slm_favored_only": {
+    "label": "SLM-favored adaptation only",
+    "n_included": 14,
+    "contingency_2x2": {
+      "axis_sum_le_5": {
+        "inside": 11,
+        "outside": 0
+      },
+      "axis_sum_ge_6": {
+        "inside": 1,
+        "outside": 2
+      }
+    },
+    "fisher_exact": {
+      "p_two_sided": 0.032967,
+      "p_one_sided_less": 1.0,
+      "p_one_sided_greater": 0.032967
+    },
+    "odds_ratio": {
+      "odds_ratio": 38.3333,
+      "ci_lower": 1.1803,
+      "ci_upper": 1245.0249,
+      "note": "Woolf 95% CI with Haldane-Anscombe 0.5 correction"
+    },
+    "cochran_armitage_trend": {
+      "levels": [
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "totals": [
+        3,
+        3,
+        5,
+        1,
+        2
+      ],
+      "inside_counts": [
+        3,
+        3,
+        5,
+        1,
+        0
+      ],
+      "z": -2.7325,
+      "p_two_sided": 0.006285
+    },
+    "mean_ar_by_axis_sum": {
+      "3": 1.1967,
+      "4": 1.1633,
+      "5": 1.244,
+      "6": 1.05,
+      "7": 0.79
+    }
+  },
+  "notes": {
+    "adaptation_symmetry_classification": "Assigned per row based on model naming and source-paper context. 'slm_favored' rows are those where the SLM was task fine-tuned, LoRA-adapted, or domain-instruction-tuned (e.g. MMedIns-Llama3-8B, RadPhi-3, Meerkat-7B, Zheng-2026 OPT-350M fine-tunes, explicit LoRA variants) and the reference was a zero-shot cloud LLM. 'symmetric' rows use comparable prompting on both sides, or both sides are fine-tuned (e.g. Hou-2025 ICD-10 where both Llama-1B and GPT-4o mini were fine-tuned). Classification is a reviewer- facing approximation, not a re-reading of each paper's protocol.",
+    "odds_ratio_note": "Woolf log-OR 95 percent CI with Haldane-Anscombe 0.5 continuity correction applied when any cell is zero. Point OR and CI are approximate and should be read as directional evidence, not a calibrated effect size."
+  }
+}

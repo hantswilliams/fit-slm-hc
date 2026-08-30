@@ -1,0 +1,47 @@
+Axis-Sum Trend Test for Envelope Membership (APPENDIX: exploratory)
+==============================================
+AR threshold: 0.9
+
+Stratum composition (all rows):
+  slm_favored: 14 rows total, 14 trend-eligible
+  symmetric: 9 rows total, 7 trend-eligible
+
+-- full (excl. variant + composite) (n=21) --
+  axis sum <= 5 : inside=16, outside=2
+  axis sum >= 6 : inside=1, outside=2
+  Fisher p (two-sided): 0.079699
+  Odds ratio (low vs. high axis inside): 16.0 (95% CI 0.9587 to 267.0331)
+    [Woolf 95% CI (uncorrected)]
+  Cochran-Armitage: z=-2.3933, p(two-sided)=0.016698
+  Levels [3, 4, 5, 6, 7] totals [4, 7, 7, 1, 2] inside [4, 6, 6, 1, 0]
+  Mean AR by axis sum: {3: 1.155, 4: 1.0329, 5: 1.1471, 6: 1.05, 7: 0.79}
+
+-- symmetric adaptation only (n=7) --
+  axis sum <= 5 : inside=5, outside=2
+  axis sum >= 6 : inside=0, outside=0
+  Fisher exact: not computed (one row of the 2x2 is empty)
+  Odds ratio: undefined [undefined: one row of the 2x2 is empty in this subset]
+  Cochran-Armitage: z=-0.9354, p(two-sided)=0.349575
+  Levels [3, 4, 5] totals [1, 4, 2] inside [1, 3, 1]
+  Mean AR by axis sum: {3: 1.03, 4: 0.935, 5: 0.905}
+
+-- SLM-favored adaptation only (n=14) --
+  axis sum <= 5 : inside=11, outside=0
+  axis sum >= 6 : inside=1, outside=2
+  Fisher p (two-sided): 0.032967
+  Odds ratio (low vs. high axis inside): 38.3333 (95% CI 1.1803 to 1245.0249)
+    [Woolf 95% CI with Haldane-Anscombe 0.5 correction]
+  Cochran-Armitage: z=-2.7325, p(two-sided)=0.006285
+  Levels [3, 4, 5, 6, 7] totals [3, 3, 5, 1, 2] inside [3, 3, 5, 1, 0]
+  Mean AR by axis sum: {3: 1.1967, 4: 1.1633, 5: 1.244, 6: 1.05, 7: 0.79}
+
+Interpretation:
+  APPENDIX / EXPLORATORY (aug28 revision). Retained for transparency;
+  no longer the primary analysis. Reasons: rows cluster by source
+  study (7 of 21 trend-eligible rows share one study and one SLM
+  checkpoint); pass-1 axis scores were not assigned blind to AR;
+  and the full-sample association is not robust to same-rater
+  re-scoring (pass 2) or to removal of the two axis-sum-7 tasks
+  (see sensitivity_suite outputs). The symmetric-only stratum still
+  lacks high-axis comparisons, so its 2x2 test is not computable.
+  Primary presentation: descriptives outputs.

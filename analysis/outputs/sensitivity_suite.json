@@ -1,0 +1,348 @@
+{
+  "ar_threshold": 0.9,
+  "pass1": {
+    "n": 21,
+    "low_inside": 16,
+    "low_outside": 2,
+    "high_inside": 1,
+    "high_outside": 2,
+    "fisher_p": 0.079699,
+    "odds_ratio": 16.0,
+    "or_ci": [
+      0.9587,
+      267.0331
+    ],
+    "ca_z": -2.3933,
+    "ca_p": 0.016698,
+    "mean_ar_by_sum": {
+      "3": 1.155,
+      "4": 1.0329,
+      "5": 1.1471,
+      "6": 1.05,
+      "7": 0.79
+    }
+  },
+  "pass2": {
+    "n": 21,
+    "low_inside": 13,
+    "low_outside": 2,
+    "high_inside": 4,
+    "high_outside": 2,
+    "fisher_p": 0.54386,
+    "odds_ratio": 3.25,
+    "or_ci": [
+      0.3399,
+      31.0743
+    ],
+    "ca_z": -2.1961,
+    "ca_p": 0.028088,
+    "mean_ar_by_sum": {
+      "3": 1.18,
+      "4": 1.115,
+      "5": 0.97,
+      "6": 1.2725,
+      "7": 0.79
+    }
+  },
+  "band_movers_pass1_to_pass2": [
+    {
+      "task_id": "T13",
+      "task_name": "Impression generation",
+      "sum_pass1": 5,
+      "sum_pass2": 6,
+      "ar": 1.2
+    },
+    {
+      "task_id": "T14",
+      "task_name": "Differential diagnosis (DDXPlus)",
+      "sum_pass1": 5,
+      "sum_pass2": 6,
+      "ar": 1.68
+    },
+    {
+      "task_id": "T15",
+      "task_name": "Treatment planning",
+      "sum_pass1": 5,
+      "sum_pass2": 6,
+      "ar": 1.16
+    }
+  ],
+  "loso": {
+    "Dawood2025": {
+      "n": 19,
+      "low_inside": 15,
+      "low_outside": 1,
+      "high_inside": 1,
+      "high_outside": 2,
+      "fisher_p": 0.050568,
+      "odds_ratio": 30.0,
+      "or_ci": [
+        1.2985,
+        693.1319
+      ],
+      "ca_z": -2.3448,
+      "ca_p": 0.019038,
+      "mean_ar_by_sum": {
+        "3": 1.155,
+        "4": 1.035,
+        "5": 1.2083,
+        "6": 1.05,
+        "7": 0.79
+      }
+    },
+    "DeVito2025": {
+      "n": 20,
+      "low_inside": 15,
+      "low_outside": 2,
+      "high_inside": 1,
+      "high_outside": 2,
+      "fisher_p": 0.087719,
+      "odds_ratio": 15.0,
+      "or_ci": [
+        0.8962,
+        251.056
+      ],
+      "ca_z": -2.4056,
+      "ca_p": 0.016145,
+      "mean_ar_by_sum": {
+        "3": 1.155,
+        "4": 1.0329,
+        "5": 1.1733,
+        "6": 1.05,
+        "7": 0.79
+      }
+    },
+    "Grothey2025": {
+      "n": 20,
+      "low_inside": 15,
+      "low_outside": 2,
+      "high_inside": 1,
+      "high_outside": 2,
+      "fisher_p": 0.087719,
+      "odds_ratio": 15.0,
+      "or_ci": [
+        0.8962,
+        251.056
+      ],
+      "ca_z": -2.3115,
+      "ca_p": 0.020803,
+      "mean_ar_by_sum": {
+        "3": 1.155,
+        "4": 1.0483,
+        "5": 1.1471,
+        "6": 1.05,
+        "7": 0.79
+      }
+    },
+    "Hanafi2024": {
+      "n": 18,
+      "low_inside": 14,
+      "low_outside": 1,
+      "high_inside": 1,
+      "high_outside": 2,
+      "fisher_p": 0.056373,
+      "odds_ratio": 28.0,
+      "or_ci": [
+        1.2084,
+        648.8094
+      ],
+      "ca_z": -2.7386,
+      "ca_p": 0.00617,
+      "mean_ar_by_sum": {
+        "3": 1.1967,
+        "4": 1.09,
+        "5": 1.1471,
+        "6": 1.05,
+        "7": 0.79
+      }
+    },
+    "Hou2025": {
+      "n": 20,
+      "low_inside": 15,
+      "low_outside": 2,
+      "high_inside": 1,
+      "high_outside": 2,
+      "fisher_p": 0.087719,
+      "odds_ratio": 15.0,
+      "or_ci": [
+        0.8962,
+        251.056
+      ],
+      "ca_z": -2.4056,
+      "ca_p": 0.016145,
+      "mean_ar_by_sum": {
+        "3": 1.155,
+        "4": 1.0329,
+        "5": 1.1667,
+        "6": 1.05,
+        "7": 0.79
+      }
+    },
+    "Kim2025": {
+      "n": 20,
+      "low_inside": 16,
+      "low_outside": 2,
+      "high_inside": 1,
+      "high_outside": 1,
+      "fisher_p": 0.284211,
+      "odds_ratio": 8.0,
+      "or_ci": [
+        0.3471,
+        184.3645
+      ],
+      "ca_z": -1.7194,
+      "ca_p": 0.085546,
+      "mean_ar_by_sum": {
+        "3": 1.155,
+        "4": 1.0329,
+        "5": 1.1471,
+        "6": 1.05,
+        "7": 0.74
+      }
+    },
+    "Liu2025ClinIE": {
+      "n": 20,
+      "low_inside": 15,
+      "low_outside": 2,
+      "high_inside": 1,
+      "high_outside": 2,
+      "fisher_p": 0.087719,
+      "odds_ratio": 15.0,
+      "or_ci": [
+        0.8962,
+        251.056
+      ],
+      "ca_z": -2.3115,
+      "ca_p": 0.020803,
+      "mean_ar_by_sum": {
+        "3": 1.155,
+        "4": 1.03,
+        "5": 1.1471,
+        "6": 1.05,
+        "7": 0.79
+      }
+    },
+    "Ranjit2024": {
+      "n": 20,
+      "low_inside": 15,
+      "low_outside": 2,
+      "high_inside": 1,
+      "high_outside": 2,
+      "fisher_p": 0.087719,
+      "odds_ratio": 15.0,
+      "or_ci": [
+        0.8962,
+        251.056
+      ],
+      "ca_z": -2.4056,
+      "ca_p": 0.016145,
+      "mean_ar_by_sum": {
+        "3": 1.155,
+        "4": 1.0329,
+        "5": 1.14,
+        "6": 1.05,
+        "7": 0.79
+      }
+    },
+    "Wu2025MedS": {
+      "n": 14,
+      "low_inside": 11,
+      "low_outside": 2,
+      "high_inside": 0,
+      "high_outside": 1,
+      "fisher_p": 0.214286,
+      "odds_ratio": 13.8,
+      "or_ci": [
+        0.4249,
+        448.209
+      ],
+      "ca_z": -1.8051,
+      "ca_p": 0.071052,
+      "mean_ar_by_sum": {
+        "3": 1.13,
+        "4": 0.9833,
+        "5": 1.038,
+        "7": 0.84
+      }
+    },
+    "Zheng2026": {
+      "n": 18,
+      "low_inside": 13,
+      "low_outside": 2,
+      "high_inside": 1,
+      "high_outside": 2,
+      "fisher_p": 0.107843,
+      "odds_ratio": 13.0,
+      "or_ci": [
+        0.7713,
+        219.1065
+      ],
+      "ca_z": -2.2239,
+      "ca_p": 0.026155,
+      "mean_ar_by_sum": {
+        "3": 1.13,
+        "4": 1.02,
+        "5": 1.1383,
+        "6": 1.05,
+        "7": 0.79
+      }
+    }
+  },
+  "one_task_per_study_enumeration": {
+    "n_combinations": 126,
+    "tasks_per_combination": 10,
+    "ca_p_median": 0.0356,
+    "ca_p_min": 0.0035,
+    "ca_p_max": 0.4404,
+    "ca_p_below_0_05": 78,
+    "fisher_p_median": 0.2,
+    "fisher_p_min": 0.0222,
+    "fisher_p_max": 1.0
+  },
+  "drop_axis_sum_7": {
+    "n": 19,
+    "low_inside": 16,
+    "low_outside": 2,
+    "high_inside": 1,
+    "high_outside": 0,
+    "fisher_p": 1.0,
+    "odds_ratio": 2.2,
+    "or_ci": [
+      0.0687,
+      70.42
+    ],
+    "ca_z": -0.4172,
+    "ca_p": 0.676498,
+    "mean_ar_by_sum": {
+      "3": 1.155,
+      "4": 1.0329,
+      "5": 1.1471,
+      "6": 1.05
+    }
+  },
+  "meds_bench_excluded": {
+    "n": 14,
+    "low_inside": 11,
+    "low_outside": 2,
+    "high_inside": 0,
+    "high_outside": 1,
+    "fisher_p": 0.214286,
+    "odds_ratio": 13.8,
+    "or_ci": [
+      0.4249,
+      448.209
+    ],
+    "ca_z": -1.8051,
+    "ca_p": 0.071052,
+    "mean_ar_by_sum": {
+      "3": 1.13,
+      "4": 0.9833,
+      "5": 1.038,
+      "7": 0.84
+    }
+  },
+  "notes": {
+    "pass2": "Pass 2 is the AR-blind re-score by the same rater. Three inside-envelope tasks cross the 5/6 band boundary; the 2x2 association collapses while the CA trend persists (p 0.028) until the axis-sum-7 tasks are removed.",
+    "enumeration": "Every combination keeping exactly one trend-eligible task per source study (the composite Builtjes row has no axis sum and is not trend-eligible)."
+  }
+}

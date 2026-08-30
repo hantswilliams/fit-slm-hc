@@ -1,0 +1,576 @@
+{
+  "all_rows": {
+    "n_rows": 23,
+    "by_threshold": {
+      "0.80": {
+        "inside": 19,
+        "outside": 4,
+        "percent_inside": 0.8261
+      },
+      "0.90": {
+        "inside": 17,
+        "outside": 6,
+        "percent_inside": 0.7391
+      },
+      "0.95": {
+        "inside": 16,
+        "outside": 7,
+        "percent_inside": 0.6957
+      }
+    },
+    "by_bucket": {
+      "low (3)": {
+        "n": 4,
+        "by_threshold": {
+          "0.80": {
+            "inside": 4,
+            "outside": 0
+          },
+          "0.90": {
+            "inside": 4,
+            "outside": 0
+          },
+          "0.95": {
+            "inside": 4,
+            "outside": 0
+          }
+        }
+      },
+      "low-mod (4)": {
+        "n": 8,
+        "by_threshold": {
+          "0.80": {
+            "inside": 7,
+            "outside": 1
+          },
+          "0.90": {
+            "inside": 6,
+            "outside": 2
+          },
+          "0.95": {
+            "inside": 5,
+            "outside": 3
+          }
+        }
+      },
+      "mod (5)": {
+        "n": 7,
+        "by_threshold": {
+          "0.80": {
+            "inside": 6,
+            "outside": 1
+          },
+          "0.90": {
+            "inside": 6,
+            "outside": 1
+          },
+          "0.95": {
+            "inside": 6,
+            "outside": 1
+          }
+        }
+      },
+      "high (6)": {
+        "n": 1,
+        "by_threshold": {
+          "0.80": {
+            "inside": 1,
+            "outside": 0
+          },
+          "0.90": {
+            "inside": 1,
+            "outside": 0
+          },
+          "0.95": {
+            "inside": 1,
+            "outside": 0
+          }
+        }
+      },
+      "composite (var.)": {
+        "n": 1,
+        "by_threshold": {
+          "0.80": {
+            "inside": 0,
+            "outside": 1
+          },
+          "0.90": {
+            "inside": 0,
+            "outside": 1
+          },
+          "0.95": {
+            "inside": 0,
+            "outside": 1
+          }
+        }
+      },
+      "high (>=7)": {
+        "n": 2,
+        "by_threshold": {
+          "0.80": {
+            "inside": 1,
+            "outside": 1
+          },
+          "0.90": {
+            "inside": 0,
+            "outside": 2
+          },
+          "0.95": {
+            "inside": 0,
+            "outside": 2
+          }
+        }
+      }
+    }
+  },
+  "unique_tasks_excl_variants": {
+    "n_rows": 22,
+    "by_threshold": {
+      "0.80": {
+        "inside": 19,
+        "outside": 3,
+        "percent_inside": 0.8636
+      },
+      "0.90": {
+        "inside": 17,
+        "outside": 5,
+        "percent_inside": 0.7727
+      },
+      "0.95": {
+        "inside": 16,
+        "outside": 6,
+        "percent_inside": 0.7273
+      }
+    },
+    "by_bucket": {
+      "low (3)": {
+        "n": 4,
+        "by_threshold": {
+          "0.80": {
+            "inside": 4,
+            "outside": 0
+          },
+          "0.90": {
+            "inside": 4,
+            "outside": 0
+          },
+          "0.95": {
+            "inside": 4,
+            "outside": 0
+          }
+        }
+      },
+      "low-mod (4)": {
+        "n": 7,
+        "by_threshold": {
+          "0.80": {
+            "inside": 7,
+            "outside": 0
+          },
+          "0.90": {
+            "inside": 6,
+            "outside": 1
+          },
+          "0.95": {
+            "inside": 5,
+            "outside": 2
+          }
+        }
+      },
+      "mod (5)": {
+        "n": 7,
+        "by_threshold": {
+          "0.80": {
+            "inside": 6,
+            "outside": 1
+          },
+          "0.90": {
+            "inside": 6,
+            "outside": 1
+          },
+          "0.95": {
+            "inside": 6,
+            "outside": 1
+          }
+        }
+      },
+      "high (6)": {
+        "n": 1,
+        "by_threshold": {
+          "0.80": {
+            "inside": 1,
+            "outside": 0
+          },
+          "0.90": {
+            "inside": 1,
+            "outside": 0
+          },
+          "0.95": {
+            "inside": 1,
+            "outside": 0
+          }
+        }
+      },
+      "composite (var.)": {
+        "n": 1,
+        "by_threshold": {
+          "0.80": {
+            "inside": 0,
+            "outside": 1
+          },
+          "0.90": {
+            "inside": 0,
+            "outside": 1
+          },
+          "0.95": {
+            "inside": 0,
+            "outside": 1
+          }
+        }
+      },
+      "high (>=7)": {
+        "n": 2,
+        "by_threshold": {
+          "0.80": {
+            "inside": 1,
+            "outside": 1
+          },
+          "0.90": {
+            "inside": 0,
+            "outside": 2
+          },
+          "0.95": {
+            "inside": 0,
+            "outside": 2
+          }
+        }
+      }
+    }
+  },
+  "low_axis_subset_unique_tasks_axis_sum_le_5": {
+    "n_rows": 18,
+    "by_threshold": {
+      "0.80": {
+        "inside": 17,
+        "outside": 1,
+        "percent_inside": 0.9444
+      },
+      "0.90": {
+        "inside": 16,
+        "outside": 2,
+        "percent_inside": 0.8889
+      },
+      "0.95": {
+        "inside": 15,
+        "outside": 3,
+        "percent_inside": 0.8333
+      }
+    },
+    "by_bucket": {
+      "low (3)": {
+        "n": 4,
+        "by_threshold": {
+          "0.80": {
+            "inside": 4,
+            "outside": 0
+          },
+          "0.90": {
+            "inside": 4,
+            "outside": 0
+          },
+          "0.95": {
+            "inside": 4,
+            "outside": 0
+          }
+        }
+      },
+      "low-mod (4)": {
+        "n": 7,
+        "by_threshold": {
+          "0.80": {
+            "inside": 7,
+            "outside": 0
+          },
+          "0.90": {
+            "inside": 6,
+            "outside": 1
+          },
+          "0.95": {
+            "inside": 5,
+            "outside": 2
+          }
+        }
+      },
+      "mod (5)": {
+        "n": 7,
+        "by_threshold": {
+          "0.80": {
+            "inside": 6,
+            "outside": 1
+          },
+          "0.90": {
+            "inside": 6,
+            "outside": 1
+          },
+          "0.95": {
+            "inside": 6,
+            "outside": 1
+          }
+        }
+      }
+    }
+  },
+  "high_axis_subset_unique_tasks_axis_sum_ge_6": {
+    "n_rows": 3,
+    "by_threshold": {
+      "0.80": {
+        "inside": 2,
+        "outside": 1,
+        "percent_inside": 0.6667
+      },
+      "0.90": {
+        "inside": 1,
+        "outside": 2,
+        "percent_inside": 0.3333
+      },
+      "0.95": {
+        "inside": 1,
+        "outside": 2,
+        "percent_inside": 0.3333
+      }
+    },
+    "by_bucket": {
+      "high (6)": {
+        "n": 1,
+        "by_threshold": {
+          "0.80": {
+            "inside": 1,
+            "outside": 0
+          },
+          "0.90": {
+            "inside": 1,
+            "outside": 0
+          },
+          "0.95": {
+            "inside": 1,
+            "outside": 0
+          }
+        }
+      },
+      "high (>=7)": {
+        "n": 2,
+        "by_threshold": {
+          "0.80": {
+            "inside": 1,
+            "outside": 1
+          },
+          "0.90": {
+            "inside": 0,
+            "outside": 2
+          },
+          "0.95": {
+            "inside": 0,
+            "outside": 2
+          }
+        }
+      }
+    }
+  },
+  "symmetric_only_unique_tasks": {
+    "n_rows": 8,
+    "by_threshold": {
+      "0.80": {
+        "inside": 6,
+        "outside": 2,
+        "percent_inside": 0.75
+      },
+      "0.90": {
+        "inside": 5,
+        "outside": 3,
+        "percent_inside": 0.625
+      },
+      "0.95": {
+        "inside": 4,
+        "outside": 4,
+        "percent_inside": 0.5
+      }
+    },
+    "by_bucket": {
+      "low (3)": {
+        "n": 1,
+        "by_threshold": {
+          "0.80": {
+            "inside": 1,
+            "outside": 0
+          },
+          "0.90": {
+            "inside": 1,
+            "outside": 0
+          },
+          "0.95": {
+            "inside": 1,
+            "outside": 0
+          }
+        }
+      },
+      "low-mod (4)": {
+        "n": 4,
+        "by_threshold": {
+          "0.80": {
+            "inside": 4,
+            "outside": 0
+          },
+          "0.90": {
+            "inside": 3,
+            "outside": 1
+          },
+          "0.95": {
+            "inside": 2,
+            "outside": 2
+          }
+        }
+      },
+      "mod (5)": {
+        "n": 2,
+        "by_threshold": {
+          "0.80": {
+            "inside": 1,
+            "outside": 1
+          },
+          "0.90": {
+            "inside": 1,
+            "outside": 1
+          },
+          "0.95": {
+            "inside": 1,
+            "outside": 1
+          }
+        }
+      },
+      "composite (var.)": {
+        "n": 1,
+        "by_threshold": {
+          "0.80": {
+            "inside": 0,
+            "outside": 1
+          },
+          "0.90": {
+            "inside": 0,
+            "outside": 1
+          },
+          "0.95": {
+            "inside": 0,
+            "outside": 1
+          }
+        }
+      }
+    }
+  },
+  "slm_favored_only_unique_tasks": {
+    "n_rows": 14,
+    "by_threshold": {
+      "0.80": {
+        "inside": 13,
+        "outside": 1,
+        "percent_inside": 0.9286
+      },
+      "0.90": {
+        "inside": 12,
+        "outside": 2,
+        "percent_inside": 0.8571
+      },
+      "0.95": {
+        "inside": 12,
+        "outside": 2,
+        "percent_inside": 0.8571
+      }
+    },
+    "by_bucket": {
+      "low (3)": {
+        "n": 3,
+        "by_threshold": {
+          "0.80": {
+            "inside": 3,
+            "outside": 0
+          },
+          "0.90": {
+            "inside": 3,
+            "outside": 0
+          },
+          "0.95": {
+            "inside": 3,
+            "outside": 0
+          }
+        }
+      },
+      "low-mod (4)": {
+        "n": 3,
+        "by_threshold": {
+          "0.80": {
+            "inside": 3,
+            "outside": 0
+          },
+          "0.90": {
+            "inside": 3,
+            "outside": 0
+          },
+          "0.95": {
+            "inside": 3,
+            "outside": 0
+          }
+        }
+      },
+      "mod (5)": {
+        "n": 5,
+        "by_threshold": {
+          "0.80": {
+            "inside": 5,
+            "outside": 0
+          },
+          "0.90": {
+            "inside": 5,
+            "outside": 0
+          },
+          "0.95": {
+            "inside": 5,
+            "outside": 0
+          }
+        }
+      },
+      "high (6)": {
+        "n": 1,
+        "by_threshold": {
+          "0.80": {
+            "inside": 1,
+            "outside": 0
+          },
+          "0.90": {
+            "inside": 1,
+            "outside": 0
+          },
+          "0.95": {
+            "inside": 1,
+            "outside": 0
+          }
+        }
+      },
+      "high (>=7)": {
+        "n": 2,
+        "by_threshold": {
+          "0.80": {
+            "inside": 1,
+            "outside": 1
+          },
+          "0.90": {
+            "inside": 0,
+            "outside": 2
+          },
+          "0.95": {
+            "inside": 0,
+            "outside": 2
+          }
+        }
+      }
+    }
+  }
+}

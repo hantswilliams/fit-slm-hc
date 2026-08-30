@@ -1,0 +1,481 @@
+%% FIT-SLM-HC manuscript, aug28 revision. Revision history: CHANGES_aug28.md.
+
+\documentclass[11pt]{article}
+
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\graphicspath{{figures/}{.}}
+\usepackage{booktabs}
+\usepackage[numbers]{natbib}
+\usepackage[colorlinks=true, citecolor=blue, linkcolor=blue, urlcolor=blue]{hyperref}
+\usepackage{xurl}
+\usepackage[font=small]{caption}
+
+%% Float management: several tall tables; allow fuller float pages and tops.
+\renewcommand{\topfraction}{0.92}
+\renewcommand{\textfraction}{0.05}
+\renewcommand{\floatpagefraction}{0.85}
+
+\title{FIT-SLM-HC: A Task--Technology Fit Framework for Identifying Tasks Suited to Small Language Models in Healthcare}
+
+\author{
+  Hants Williams\thanks{Corresponding Author. Email: \texttt{hants.williams@stonybrook.edu}} \\
+  Stony Brook University \\
+  Stony Brook, New York, USA
+}
+
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+\textbf{Background:}
+Small Language Models (SLMs) running on local hardware can reduce the privacy, latency, and cost concerns associated with cloud-based Large Language Models (LLMs) in healthcare, but deciding when to use them is typically under-specified in current practice. The problem is compounded by model turnover: benchmark results tied to specific models begin to date as soon as they are published.
+
+\textbf{Objective:}
+This paper introduces FIT-SLM-HC (Framework for Identifying Tasks for Small Language Models in Healthcare), a framework rooted in Task--Technology Fit theory for structuring and prioritizing the evaluation of clinical tasks as candidates for on-device SLMs. The framework is deliberately model-agnostic: it certifies no particular model, but specifies a measurement procedure that organizations can re-run as models, hardware, and adaptation practice evolve. The task-side scores set expectations and evaluation priorities; the measurement, not the scores, renders the deployment verdict.
+
+\textbf{Methods:}
+The framework separates task-side properties, scored along axes of \emph{Reasoning Complexity}, \emph{Knowledge Boundedness}, and \emph{Output Structure}, from system-side metrics: \emph{Accuracy Ratio (AR)} and \emph{Latency Efficiency (LE)}, computed relative to a named reference model (preferably a cloud baseline in the intended deployment setting) together with an absolute latency target. An SLM capability envelope is the set of tasks for which a specific system meets risk-adjusted thresholds. Claims are organized in three tiers: (i) the measurement procedure, model-invariant by construction; (ii) a mechanism-level prediction that a less capable model's relative performance degrades as tasks demand more stored knowledge and deeper reasoning; and (iii) a time-indexed snapshot of published 2024--2026 healthcare benchmarks (22 unique tasks, 11 studies). Task scoring was performed by the framework's designer, initially with outcomes visible; a delayed outcome-blind re-score and a suite of sensitivity analyses (re-score stability, leave-one-study-out, removal of extreme task groups) are reported alongside, and the snapshot analysis is deliberately descriptive.
+
+\textbf{Results:}
+Three vignettes illustrate the procedure end-to-end. A pathology structured-data extraction task sits inside the envelope under symmetric prompting (AR $=$ 0.94, LE $\approx$ 0.50--0.58), passing the default 0.90 threshold while failing strict 0.95 non-inferiority, and 4-bit quantization of the same system moves the same task outside (AR $=$ 0.71). A clinical note summarization task falls outside on content recall (ROUGE-1 AR $=$ 0.73) despite near-parity on semantic similarity (BERTScore AR $=$ 0.98). A wearable fatigue-prediction task shows the reference standard flipping the verdict: the best zero-shot on-device SLM scores AR $=$ 1.53 against its on-device comparator but AR $=$ 0.87 against GPT-4 in the same benchmark table. Across the snapshot, 16 of the 18 unique tasks with axis sum $\leq 5$ reached $AR \geq 0.90$ and 13 exceeded 1.0, most under SLM-favoring adaptation asymmetry; mean AR is flat and non-monotonic across axis sums 3--6 (1.16, 1.03, 1.15, 1.05) and drops only at axis sum 7 (0.79), a band containing exactly two tasks, both open-domain medical exam QA. The apparent axis-sum trend is not robust: the dichotomized association collapses under the outcome-blind re-score, and the ordered trend vanishes when the two axis-sum-7 tasks are removed. Of the three axes, only reasoning complexity shows a monotone mean-AR gradient (1.12, 1.09, 0.88), and its top level is populated mainly by the same two exam-QA tasks; the output-structure axis is untested by the available literature (20/1/0 coverage across its levels). Only one snapshot source reported latency usable for LE, a reporting gap the paper documents and proposes to fix.
+
+\textbf{Conclusions:}
+FIT-SLM-HC gives healthcare organizations a structured procedure for deciding where to deploy SLMs and where to default to cloud or human-led workflows, and makes explicit that metric selection, reference-model selection, and threshold selection are all governance decisions: the same deployment can look adequate or inadequate depending on each. Because the empirical snapshot is expected to date as models improve, the durable contributions are the procedure and the mechanism; envelope verdicts are indexed to a task, a system configuration, a reference, thresholds, and a date, and are meant to be recomputed rather than transferred. The framework is proposed as a first-pass triage layer; blinded multi-annotator validation of the task rubric and prospective evaluation remain necessary before the axis scores can be treated as predictive.
+\end{abstract}
+
+%% ============================================================
+%% SECTION 1: INTRODUCTION
+%% ============================================================
+\section{Introduction}
+
+Large language models (LLMs) are artificial intelligence systems trained on very large text collections to interpret and generate human language; Minaee et al.\ provide an accessible technical overview for readers new to the field \cite{Minaee2024}. A model's size is conventionally described by its parameter count: the number of internal numerical values it learns during training, which serves as a rough index of its capacity. LLMs with billions to trillions of parameters now score well on clinical reasoning tasks \cite{Singhal2023, Nori2023}, medical question answering, biomedical text mining, and clinical documentation \cite{Thirunavukarasu2023, VanVeen2024}. Deploying them in healthcare, however, is more complex. The most capable models are hosted in vendor data centers and reached over the internet through cloud application programming interfaces (APIs), so clinical use requires transmitting Protected Health Information (PHI) to third-party vendors, creating friction with the HIPAA Privacy Rule and equivalent frameworks. Per-inference pricing (each individual model query is billed) makes costs hard to predict, and hallucination (the tendency of language models to produce fluent but factually incorrect output) means outputs still require human verification \cite{Adams2026, Su2025}. The compliance picture is not binary. Cloud endpoints can be operated under a Business Associate Agreement (BAA), the HIPAA mechanism through which a covered entity extends its obligations to a vendor that handles PHI on its behalf \cite{HHSBAA, Marks2023HIPAAAI}, and PHI can sometimes be stripped from inputs before transmission using automated de-identification pipelines \cite{Kovacevic2024DeID}. BAA-covered endpoints may still raise institutional concerns about data residency, vendor lock-in, and audit control, and de-identification is imperfect, particularly for unstructured clinical text.
+
+\textit{Small Language Models} (SLMs) are defined here functionally rather than by a fixed parameter count: an SLM is a language model that runs within an institution's local deployment budget, that is, the hardware, memory, and latency envelope the organization can provision on infrastructure it controls \cite{Zhang2024TinyLlama, Liu2024Mobile}. As of 2026 this typically means models below roughly ten billion parameters, but that number is a property of current hardware and inference optimization, not of the framework; the operational cutoff used for the retrospective snapshot in Section~3 is stated in Section~\ref{sec:methods-retro}. Running on institutional hardware, SLMs eliminate the PHI transmission vector entirely, convert variable API costs into a fixed hardware investment, and give organizations direct governance control. This does not make them HIPAA-compliant by default. The HIPAA Security Rule \cite{HHS2013SecurityRule} requires administrative, physical, and technical safeguards regardless of where the model runs: access controls, encryption at rest, audit logging, and workforce training all apply to on-premise deployments \cite{Marks2023HIPAAAI}. A hospital laptop running an SLM on an unencrypted disk with no access controls is a compliance violation even though no data left the building. Local deployment changes the \emph{type} of compliance work required, not whether compliance work is required. On the capability side, smaller models carry less parametric knowledge (the facts a model absorbs into its parameters, or ``weights,'' during training) than frontier LLMs, which limits what they can do on tasks requiring broad clinical knowledge or multi-step medical reasoning \cite{Li2023TextbooksII}.
+
+In practice, the choice between a local SLM and a cloud LLM is often made through ad hoc experimentation and informal qualitative assessment. This approach obscures the task characteristics that actually determine whether a small model will work. Without a principled framework, organizations risk two kinds of mistakes: running SLMs on safety-critical tasks beyond their capability, or defaulting to cloud LLMs when a local model would have been sufficient, exposing PHI for no gain.
+
+This paper proposes FIT-SLM-HC (Framework for Identifying Tasks for Small Language Models in Healthcare), which adapts Task--Technology Fit theory \cite{Goodhue1995, Zigurs1998} to the specific trade-offs of generative language models in clinical settings. The framework separates \emph{task-side properties} from \emph{system-side behavior}. Tasks sit in a three-dimensional space defined by reasoning complexity, knowledge boundedness, and output structure. Whether a given task is suitable for a local SLM is then evaluated using two relative metrics, Accuracy Ratio (AR) and Latency Efficiency (LE), which compare the local system against a stronger reference model, typically a frontier cloud LLM, plus an absolute latency target. Two clarifications frame everything that follows. First, this is a governance-oriented triage tool, not a replacement for full benchmarking. Second, the task-side scores do not by themselves decide anything: they set expectations, order the evaluation queue, and tell an institution where to look hardest, while the measurement in steps two and three of the procedure renders the verdict. The framework is presented below, together with an explicit account of which of its claims are model-invariant and which are time-indexed (Section~\ref{sec:scope}), followed by three vignettes that walk through boundary cases from recent healthcare AI literature and a broader retrospective snapshot of twenty-two tasks across eleven published benchmarks.
+
+Because SLM deployment decisions in healthcare are usually made by mixed committees (clinical, operational, compliance, and IT) rather than by machine-learning or statistics specialists, the presentation assumes no prior background in machine learning or statistics: advanced concepts are introduced briefly at first mention with a supporting reference, Table~\ref{tab:glossary} defines the model and metric terms used throughout, and each quantitative result in Section~3 is paired with a plain-language reading.
+
+%% ------------------------------------------------------------
+\subsection{Related Approaches}
+\label{sec:related}
+
+The decision FIT-SLM-HC structures, when a smaller and cheaper model should stand in for a larger one, is also addressed by an active line of work on \emph{model routing} and \emph{cascading}. Routers learn, per query, whether a small model's answer will suffice and escalate to a larger model otherwise \cite{Ong2025RouteLLM, Ding2024HybridLLM}; cascade systems such as FrugalGPT sequence models by cost and stop as soon as a response is judged reliable \cite{Chen2024FrugalGPT}. These systems optimize the same accuracy--cost frontier automatically and at inference time. FIT-SLM-HC differs in three ways that matter in clinical governance. It operates \emph{ex ante} and at the task level: an institution decides, before deployment and per workflow, whether an SLM is a candidate at all, which is the granularity at which compliance review, procurement, and clinical sign-off actually happen. Its decisions are legible to the mixed committees named above, because the inputs are a human-readable task profile and two ratios rather than learned router weights. And a task-level ``local only'' decision keeps PHI off external infrastructure entirely, whereas per-query routing sends some fraction of live traffic, and, in some designs, the router's training signal, through the larger model. The two approaches are complementary: a router can operate inside the region FIT-SLM-HC clears for local deployment.
+
+A second adjacent line is reporting and governance guidance for clinical AI, such as TRIPOD+AI for prediction models \cite{Collins2024TRIPODAI} and CONSORT-AI for trials of AI interventions \cite{Liu2020CONSORTAI}. Those instruments standardize how studies are reported; FIT-SLM-HC sits earlier in the pipeline, structuring the deployment triage decision and specifying which measurements (including the latency reporting called for in Section~4) a decision-grade comparison needs. Finally, general LLM evaluation harnesses and healthcare benchmark suites, including several of the sources in Section~3, supply the raw comparisons the framework consumes; the framework adds the task-side coordinate system, the explicit reference standard, and the governance thresholds that turn a benchmark number into a deployment decision.
+
+\begin{table}[p]
+\centering
+\small
+\caption{Key terms as used in this paper.}
+\label{tab:glossary}
+\begin{tabular}{@{}p{3.4cm}p{11.4cm}@{}}
+\toprule
+Term & Meaning here \\
+\midrule
+LLM / SLM & Large language model (typically cloud-hosted; ``frontier'' denotes the most capable current generation) / small language model, defined functionally above as one that runs on institution-controlled hardware. \\
+Parameter (weight) & One of the internal numerical values a model learns during training. Parameter count is the standard measure of model size; ``weights'' is a synonym. \\
+Token & A short chunk of text, roughly a word or word fragment, that a model reads and writes one at a time. \\
+Inference & Running a trained model to produce an output for a given input. Cloud providers typically charge per inference. \\
+Hallucination & Fluent but factually incorrect or fabricated model output; the main reason model outputs in healthcare require human verification. \\
+Zero-shot / few-shot & Using a model with instructions only (zero-shot), or with a small number of worked examples included in the prompt (few-shot; ``3-shot'' means three examples). \\
+Fine-tuning & Additional training of a model on examples of the target task. \\
+Instruction tuning & Fine-tuning on instruction--response pairs, often domain-specific (e.g., medical). \\
+LoRA & Low-rank adaptation: a lightweight fine-tuning method that trains a small add-on to an otherwise frozen model. \\
+Adaptation & Umbrella term for fine-tuning, instruction tuning, or LoRA. A comparison is \emph{symmetric} when both models are comparably adapted (or both merely prompted) and \emph{SLM-favored} when only the small model was adapted for the task. \\
+Quantization & Storing model weights at lower numeric precision (e.g., 4-bit) to cut memory use and increase speed, sometimes at an accuracy cost. \\
+Parametric knowledge & Facts stored in a model's weights during training, as opposed to information supplied in the prompt. \\
+Prompt / context window & The text given to the model at question time / the maximum amount of such text the model can consider at once. \\
+Retrieval augmentation & Automatically fetching relevant reference text (e.g., from a document store) and adding it to the prompt, so the model answers from supplied context rather than from stored knowledge. \\
+Time-to-first-token & Delay between submitting a request and the start of the model's answer; a common interactive-latency measure. \\
+F1 score & Harmonic mean of precision and recall (0--1); balances false positives against false negatives. \\
+Exact match (EM) & Fraction of outputs identical to the reference answer. \\
+ROUGE-1 & Word overlap between a generated summary and a reference summary; read here as content recall (did the summary keep the source facts?). \\
+BERTScore & Similarity of \emph{meaning} between generated and reference text; can stay high even when specific details are missing. \\
+Cohen's $\kappa$ & Agreement between two sets of ratings, corrected for chance; 0 = chance-level, 1 = perfect. Reported here without conventional verbal glosses, because both rating passes come from the same rater (Section~\ref{sec:audit}). \\
+Odds ratio (OR); 95\% CI & How many times higher the odds of an outcome are in one group than another; the confidence interval is the range of values compatible with the data; an interval that crosses 1 means ``no effect'' cannot be ruled out. \\
+\bottomrule
+\end{tabular}
+\end{table}
+%% ============================================================
+%% SECTION 2: THE FIT-SLM-HC FRAMEWORK
+%% ============================================================
+\section{The FIT-SLM-HC Framework}
+
+FIT-SLM-HC starts from a simple claim: suitability is not a fixed property of a model weights file. It is a relationship between task characteristics and the system (model plus hardware), and that relationship changes when either side changes (Figure~\ref{fig:framework}).
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=0.82\linewidth]{figure1_axes_schematic}
+  \caption{The FIT-SLM-HC task-side coordinate system. The three axes are human-scored task properties on a 1--3 ordinal scale; level~1 is the most constrained (and, by the Tier-2 mechanism of Section~\ref{sec:scope}, the most SLM-favorable) level of each axis. The figure deliberately draws no suitability zones: whether a particular system covers a particular task is a measurement (AR and LE against a named reference, Section~\ref{sec:system}), not a region of this diagram, and the measured snapshot in Section~3 (Figure~\ref{fig:scatter}) shows that equal axis sums do not behave interchangeably.}
+  \label{fig:framework}
+\end{figure}
+
+%% ------------------------------------------------------------
+%% SECTION 2.1: TASK-SIDE PROPERTIES
+%% ------------------------------------------------------------
+\subsection{Task-Side Properties: The 3-Axis Typology}
+
+Each task is scored on three axes that approximate the cognitive and structural demands it places on a model. Each axis uses a 3-point ordinal scale. The axes are properties of the task alone: they are scored from the task's instructions, inputs, and target outputs, without reference to any model.
+
+Scoring should reflect the dominant requirement of the intended workflow under normal operating conditions, not rare edge cases. Reviewers score the task using the actual instructions, input context, and target output expected at deployment. When a task plausibly spans two levels on an axis, the conservative choice is to assign the higher level, or to document both candidate scores and adjudicate explicitly. If retrieval, templating, or other workflow constraints are added before deployment, score the transformed workflow, not the raw prompt alone.
+
+\paragraph{Reasoning Complexity ($r$).}
+This axis captures the number of logical steps required to go from input to output. At the lowest level ($r=1$), the answer exists contiguously in the source text and the task is pure extraction (e.g., pulling a patient's age from a clinical note). Moderate complexity ($r=2$) requires interpretation: single-step logic to rephrase or categorize information that is not explicitly labeled, such as classifying a patient portal message as ``urgent'' based on clinical indicators. High complexity ($r=3$) requires synthesis: multi-step reasoning in which the model must connect findings that are not explicitly linked in the input, as in deriving a differential diagnosis. In the technical literature this kind of reasoning is often elicited through ``chain-of-thought'' prompting, in which the model is asked to write out its intermediate reasoning steps before answering \cite{Wei2022, Lievin2024}. Table~\ref{tab:reasoning} summarizes the levels.
+
+\begin{table}[ht]
+  \centering
+  \caption{Reasoning Complexity ($r$) Scoring Rubric}
+  \label{tab:reasoning}
+  \begin{tabular}{@{}llll@{}}
+    \toprule
+    Level & Type & Description & Logic Requirement \\
+    \midrule
+    $r=1$ & Direct Extraction & Answer exists verbatim in the text & Zero-step (copy/paste) \\
+    $r=2$ & Interpretation & Requires rephrasing or categorizing & Single-step logic \\
+    $r=3$ & Synthesis & Requires connecting multiple ideas & Multi-step / External logic \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\paragraph{Knowledge Boundedness ($k$).}
+This axis measures reliance on stored (internal) knowledge versus provided context. Closed-domain tasks ($k=1$) are self-contained: everything needed to reach an answer is in the prompt \cite{Lewis2020}. Domain-specific tasks ($k=2$) require specialized knowledge not in the prompt, such as clinical terminology, pharmacological interactions, or diagnostic criteria. Open-domain tasks ($k=3$) depend on broad world knowledge or current events \cite{Mallen2023}. Smaller models, whatever their generation, are least disadvantaged on closed-domain tasks, where they function as reasoning engines over the provided data rather than as knowledge stores. Table~\ref{tab:knowledge} summarizes the levels.
+
+\begin{table}[ht]
+  \centering
+  \caption{Knowledge Boundedness ($k$) Scoring Rubric}
+  \label{tab:knowledge}
+  \begin{tabular}{@{}llll@{}}
+    \toprule
+    Level & Type & Information Source & Reliance \\
+    \midrule
+    $k=1$ & Closed-Domain & Entirely within context window & None (Self-contained) \\
+    $k=2$ & Domain-Specific & Specialized or technical knowledge & Moderate (Field-specific) \\
+    $k=3$ & Open-Domain & General world knowledge/events & High (External/Stored) \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\paragraph{Output Structure ($o$).}
+This axis measures the constraints on what the model must produce. Deterministic outputs ($o=1$) have a fixed format: binary classification, JSON extraction, or predefined labels. Templated outputs ($o=2$) are structured free text that must follow specific stylistic or formatting rules. Creative outputs ($o=3$) are open-ended, and success depends on qualitative factors like tone, empathy, or novelty \cite{Bubeck2023}. Table~\ref{tab:output} summarizes the levels.
+
+\begin{table}[ht]
+  \centering
+  \caption{Output Structure ($o$) Scoring Rubric}
+  \label{tab:output}
+  \begin{tabular}{@{}llll@{}}
+    \toprule
+    Level & Type & Format Style & Primary Evaluation \\
+    \midrule
+    $o=1$ & Deterministic & Fixed (JSON, Binary, Labels) & Accuracy / Exact Match \\
+    $o=2$ & Templated & Constrained free-text & Adherence to Guidelines \\
+    $o=3$ & Creative & Open-ended generation & Quality, Tone, \& Novelty \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+%% ------------------------------------------------------------
+%% SECTION 2.2: SYSTEM-SIDE CAPABILITIES
+%% ------------------------------------------------------------
+\subsection{System-Side Capabilities: The Envelope}
+\label{sec:system}
+
+Task suitability is measured by comparing the local inference stack (model, quantization level, and hardware; Table~\ref{tab:glossary}) \cite{Dettmers2024} against a reference baseline, preferably a frontier cloud LLM, on two dimensions: accuracy and latency.
+
+The \textbf{Accuracy Ratio (AR)} is the SLM's performance relative to the reference on whatever metric is appropriate for the task (e.g., F1, Recall, BERTScore):
+\begin{equation}
+  AR = \frac{\text{Performance}_{\text{SLM}}}{\text{Performance}_{\text{Reference}}}
+  \label{eq:ar}
+\end{equation}
+
+An $AR \geq 1.0$ means the SLM matches or exceeds the reference model; an $AR < 1.0$ quantifies the ``performance tax'' of running on-device. For example, $AR = 0.90$ means the local model retains 90\% of the reference model's score on the chosen metric. In the preferred workflow, the reference is a cloud LLM, though secondary literature analyses may need a stronger non-cloud comparator when no direct cloud baseline exists; this distinction should always be stated, and Section~\ref{sec:vignette-c} shows a case where it reverses the verdict. Organizations set thresholds based on risk appetite. The thresholds used in Section~3 ($AR \geq 0.90$ primary; $0.80$ lenient; $0.95$ strict) are governance defaults, not universal constants. A low-risk administrative task might tolerate moderate AR loss under human review; a higher-stakes clinical task might demand strict non-inferiority ($AR \geq 0.95$). Because AR is a ratio, comparisons across tasks that use different metric families (e.g., F1, exact match, ROUGE, BERTScore, clinician Likert ratings) are not directly commensurable; readers should interpret the ratio within the metric it was computed from. Likert-based AR values should be treated as illustrative rather than as a defensible ratio, because Likert scales are ordinal.
+
+\textbf{Latency Efficiency (LE)} captures the speed consequence of local execution relative to the incumbent alternative:
+\begin{equation}
+  LE = 1 - \frac{\text{Latency}_{\text{SLM}}}{\text{Latency}_{\text{Reference}}}
+  \label{eq:le}
+\end{equation}
+
+For example, $LE = 0.50$ means the local system responds in half the reference's time, and $LE = 0$ means no speed advantage. Two design choices need justifying, and they rest on different grounds. First, LE saturates: once responses are faster than human perceptual thresholds, further speedup buys little, a point long established in the human--computer interaction literature on absolute response-time limits (roughly 0.1~s for perceived instantaneity, 1~s for uninterrupted flow of thought, 10~s for holding attention) \cite{Miller1968, Nielsen1993}. Second, LE penalizes slowdowns more than it credits equivalent speedups (negative values are unbounded). That asymmetry is a deliberate design choice rather than an established response-time finding: it mirrors the general behavioral pattern that losses loom larger than equivalent gains \cite{Kahneman1979, Tversky1991}, and it is consistent with large-scale field experiments in which added delay measurably depressed search use, with effects that outlasted the delay itself \cite{Brutlag2009}. Because LE is purely relative, it says nothing about whether either system is fast \emph{enough}: a local model at 0.4~s against a cloud API at 0.2~s scores $LE = -1.0$ though both are imperceptibly fast, and a local model at 8~s against a 40~s reference scores $LE = 0.80$ though both may be unusable interactively. The envelope condition therefore also includes an \textbf{absolute latency target} $L_{\max}$, a task-appropriate wall-clock bound chosen by the institution (informed by the perceptual thresholds above and by the workflow's tempo), which the candidate system must meet regardless of the ratio. For comparability, LE should be computed using the same latency definition across systems for a given task (e.g., time-to-first-token for interactive generation, or end-to-end completion time for bounded outputs), with repeated trials and reported spread, especially when cloud latency includes network variability.
+
+Together, AR, LE, and $L_{\max}$ define the \emph{SLM Capability Envelope}: the set of tasks on which a specific local system meets its risk-adjusted requirements. The envelope is a measured set, not a region read off the task diagram: tasks with equal axis scores need not share a verdict (Figure~\ref{fig:scatter}). The framework keeps these as separate governance signals rather than collapsing them into a single score, because institutions weight safety, privacy, and workflow speed differently depending on the task.
+
+%% ------------------------------------------------------------
+%% SECTION 2.3: SCOPE OF CLAIMS
+%% ------------------------------------------------------------
+\subsection{Scope of Claims: What Is Model-Invariant}
+\label{sec:scope}
+
+Any framework evaluated against named models faces a predictable objection: the models will be replaced within months, so why should the findings outlive them? FIT-SLM-HC is structured so that most of it does. Its claims fall into three tiers with different temporal scopes, and the tiers should not be conflated.
+
+\paragraph{Tier 1: The measurement procedure (model-invariant by construction).}
+The task-side axes are scored from the task description, inputs, and target outputs alone; no property of any model enters the scoring. The system-side metrics are ratios defined for an arbitrary pair of systems (any candidate and any reference, including models that do not yet exist), and the envelope thresholds are governance parameters set by the deploying institution. Nothing in the procedure names a model family, a parameter count, or a benchmark year. Nothing even restricts the candidate to being ``small'': formally, the framework compares any candidate system against any reference system, and the SLM-versus-cloud comparison is the motivating instance rather than a structural requirement (the snapshot in Section~3 already includes a local 8B-versus-70B pair \cite{Builtjes2025}).
+
+\paragraph{Tier 2: A directional mechanism (expected to hold across model generations).}
+The framework predicts that, for any \emph{capability-asymmetric} pair (a candidate with less parametric capacity than its reference), the candidate's relative performance degrades as a task moves outward along the axes. This is a claim about mechanism, not about particular checkpoints, and the three axes are predicted to act through three \emph{different} mechanisms. On the knowledge axis, overall model capability scales smoothly with parameter count \cite{Kaplan2020}, and the factual knowledge a model can store in its weights scales with parameter count in particular \cite{AllenZhu2024}, so the smaller model is disadvantaged precisely when answers must come from weights rather than context; at $k=1$ the prompt supplies the knowledge and the disadvantage is largely neutralized \cite{Lewis2020, Mallen2023}. On the reasoning axis, multi-step inference compounds per-step error, and compositional reasoning degrades disproportionately in smaller models \cite{Wei2022, Dziri2023}, so the capability gap widens with $r$. On the output axis, constrained output spaces reduce both the generation burden and the evaluation variance, muting the gap at $o=1$ relative to open-ended generation; this mechanism is stated as design rationale only, and it remains \emph{untested} by the snapshot in Section~3, whose 21 axis-scored tasks include twenty at $o=1$, one at $o=2$, and none at $o=3$. Because the mechanisms differ, adding the three scores into a single ``axis sum'' asserts an interchangeability the framework itself does not claim; the sum is used in Section~3 as a compact reporting convenience, and the per-axis breakdown there is the primary view. The prediction concerns the \emph{ordering} of tasks along each axis (the direction of the gradient), not the location of the envelope boundary. As smaller models improve, the boundary is expected to move outward; the ordering should persist for as long as the capability asymmetry itself does.
+
+\paragraph{Tier 3: A time-indexed snapshot (expected to date).}
+The retrospective application in Section~3 is an empirical snapshot of healthcare benchmarks published between 2024 and 2026, using the models those studies evaluated. Its envelope verdicts are indexed to specific systems, adaptation choices, references, and thresholds, and they will become outdated as models improve. That is not a defect of the analysis; it is the reason the framework is stated as a procedure. The snapshot demonstrates the instrument and provides a descriptive, non-confirmatory look at the Tier-2 direction on current evidence. Deployment decisions should come from re-running the procedure on the systems actually under consideration, not from transferring the snapshot's verdicts.
+
+%% ============================================================
+%% SECTION 3: ILLUSTRATIVE APPLICATIONS
+%% ============================================================
+\section{Illustrative Applications: A 2024--2026 Snapshot}
+
+This section applies FIT-SLM-HC retrospectively to published healthcare benchmarks to show how the framework behaves in concrete cases. Three detailed vignettes are presented first: one task inside the envelope with both metrics measurable (Section~\ref{sec:vignette-a}), one outside on the clinically conservative metric (Section~\ref{sec:vignette-b}), and one in which the choice of reference standard flips the verdict (Section~\ref{sec:vignette-c}). An extended retrospective application to twenty-two tasks across eleven benchmarks follows, presented descriptively with a full set of sensitivity analyses; formal association tests are confined to Appendix~\ref{app:tests} and labeled exploratory. Consistent with Section~\ref{sec:scope}, this section is a Tier-3 snapshot: its verdicts are indexed to the specific systems, adaptation choices, and thresholds involved. The applications are illustrative rather than confirmatory: the framework's designer also performed the task scoring, initially with outcome values visible, so the patterns show how the framework organizes known evidence, not an independent validation (Sections~\ref{sec:methods-retro} and~\ref{sec:audit}, and Limitations, Section~4).
+
+%% ------------------------------------------------------------
+%% SECTION 3.1: METHODS
+%% ------------------------------------------------------------
+\subsection{Methods for the Retrospective Application}
+\label{sec:methods-retro}
+
+\paragraph{Study identification.}
+Published healthcare benchmarks comparing SLM(s) and a larger reference model on the same task were identified through a non-systematic convenience search of PubMed, arXiv, and Google Scholar between September 2024 and April 2026, using combinations of ``small language model,'' ``clinical,'' ``biomedical,'' ``on-device,'' ``local deployment,'' and names of specific SLMs (e.g., Phi, Llama-3 8B, Gemma, Qwen). Inclusion required (a) at least one reported SLM-scale model ($\leq$~9B parameters, the operational cutoff adopted for this snapshot under the functional definition in Section~1), (b) a cloud-scale or larger reference model evaluated on the same task under comparable conditions, and (c) sufficient numerical reporting to compute AR. Studies reporting only aggregate leaderboard scores without task-level splits, studies not primarily in healthcare, and studies without a comparator were excluded. This procedure is explicitly a convenience-based retrospective mapping and should not be interpreted as a systematic review.
+
+\paragraph{Structure of the resulting sample.}
+The 22 unique tasks cluster heavily by source: one study (MedS-Bench \cite{Wu2025MedS}) contributes seven tasks, all evaluated with the same instruction-tuned SLM checkpoint (MMedIns-Llama3-8B) against the same reference (GPT-4), and three further studies contribute two or three tasks each. Observations are therefore not independent, and none of the association statistics reported in this paper is given an inferential interpretation: the primary presentation is descriptive, and the sensitivity analyses in Section~\ref{sec:results} quantify how much each source cluster drives the aggregate picture. Two provenance facts about the largest cluster matter for interpretation and are carried into Table~\ref{tab:extended}: the GPT-4 reference in the MedS-Bench rows was evaluated with 3-shot prompting (zero-shot for the USMLE medical-QA row only), and MMedIns-Llama3-8B was instruction-tuned on a corpus (MedS-Ins) whose task categories include those of the evaluation benchmark, with no held-out protocol described in the source, so within-cluster AR values may partly reflect task-family exposure rather than model capability.
+
+\paragraph{Axis scoring and its blinding status.}
+Each task was scored on $(r, k, o)$ by the manuscript author using the rubrics in Section~2.1, based on the task description, example inputs, and target outputs as presented in the source benchmark. When a source reported multiple tasks, each was scored separately; ambiguous cases were scored conservatively (higher level on the disputed axis). Two facts about this scoring must be stated plainly. First, it is single-rater, and the rater is the framework's designer. Second, the original scoring pass, the one used in Table~\ref{tab:extended}, was performed with the source studies' results in view, so it was \emph{not} blind to the outcomes it is compared against; assigning a predictor with knowledge of the outcome is a stronger threat to validity than single-rater subjectivity alone, and the two are reported separately here. To audit the procedure, the same author later re-scored all axis-scoreable tasks against only the task descriptions, without reference to the original scores or any AR values, several days after the original pass. This outcome-blind second pass is used in Section~\ref{sec:results} both as a stability check (per-axis agreement, $\kappa$, and the direction of every disagreement) and as an alternative scoring under which all headline patterns are recomputed. Neither pass substitutes for the blinded multi-annotator study that remains future work. All data, scoring files, and analysis scripts are provided in the companion repository (see the Data Availability statement).
+
+\paragraph{Analysis plan.}
+The primary analysis is descriptive: mean, median, and range of AR by axis sum and separately by $r$ and $k$ level, with envelope membership counted at $AR \geq 0.80/0.90/0.95$ ($o$ admits no per-level analysis; see Section~\ref{sec:scope}). Because no institutional latency target can be supplied retrospectively, snapshot verdicts apply the accuracy criterion (Equation~\ref{eq:ar}) alone; the absolute latency check is a deployment-time test. Sensitivity analyses recompute the headline patterns under (a) the outcome-blind re-score, (b) leave-one-study-out deletion, (c) every possible one-task-per-study subsample, (d) removal of the two axis-sum-7 tasks, and (e) removal of the MedS-Bench cluster. The scoring audit reports agreement, $\kappa$ (unweighted and linearly weighted), the direction of all disagreements with an exact sign test, and Bowker's test of marginal homogeneity \cite{Bowker1948}. The 4-bit quantization variant (Table~\ref{tab:extended}) is excluded from unique-task counts, and the composite multi-task row (no single axis profile) from axis-based analyses. Fisher exact, odds-ratio, and Cochran--Armitage trend statistics are reported only in Appendix~\ref{app:tests}, labeled exploratory, because the clustering, the non-blind primary scoring, and the sparsity of the high-axis region (three unique tasks at axis sum $\geq 6$) leave them without a valid inferential interpretation here.
+
+%% ------------------------------------------------------------
+%% SECTION 3.2: VIGNETTE A
+%% ------------------------------------------------------------
+\subsection{Vignette A: Inside the Envelope (Pathology Structured-Data Extraction)}
+\label{sec:vignette-a}
+
+The first case is extraction of structured parameters from free-text pathology reports \cite{Grothey2025}, the only task in the snapshot for which both AR and LE are computable under symmetric adaptation (both systems prompted, neither fine-tuned). The model receives a pathology report and must populate a fixed set of fields. Under FIT-SLM-HC the task scores $(1, 2, 1)$: reasoning is extraction ($r=1$), the vocabulary is specialist pathology terminology ($k=2$), and the output is a deterministic structure ($o=1$).
+
+On the English-language dataset, Llama3-8B reached 91\% overall accuracy against GPT-4's reported ``over 97\%,'' giving $AR = 91/97 = 0.94$ (using the more conservative figure-panel value of 98\% would give 0.93; the verdict is identical at every threshold used here). The source also reports processing times for both systems: 5--6 seconds per report for the local model against approximately 12 seconds per report for GPT-4, giving $LE \approx 0.50$--$0.58$. In plain terms: the local 8B model keeps about 94\% of the cloud model's accuracy while returning results in roughly half the time, without PHI transmission. At the default governance threshold ($AR \geq 0.90$) the task is inside the envelope; under strict non-inferiority ($AR \geq 0.95$), it is not. That flip is not a defect of the framework; it is the framework doing its job, making explicit that the deployment decision here belongs to the institution's risk appetite, not to the benchmark.
+
+The same source then shows how quickly a configuration change can move a task outside the envelope. Quantizing the same model to 4-bit precision dropped English-dataset accuracy from 91\% to 69\%, i.e.\ $AR = 0.71$, below even the lenient threshold (a chain-of-verification prompting strategy recovered part of the loss, to 73\%). Quantization, hardware, and prompting strategy are all part of the system-side configuration, and Table~\ref{tab:extended} therefore carries the 4-bit variant as its own evaluation row: an envelope verdict certifies a configuration, not a model name.
+
+%% ------------------------------------------------------------
+%% SECTION 3.3: VIGNETTE B
+%% ------------------------------------------------------------
+\subsection{Vignette B: Outside the Envelope (MIMIC-IV Clinical Note Summarization)}
+\label{sec:vignette-b}
+
+The second case is extractive summarization of discharge summaries from the MIMIC-IV clinical database \cite{Naemi2025}. The benchmark processed 30{,}000 discharge summaries (averaging 1{,}602 words each) using 16 language models without task-specific fine-tuning. The model must extract and retain all relevant clinical details, including demographics, diagnoses, medications, lab results, procedures, and discharge instructions, and organize them into a structured narrative. Under FIT-SLM-HC, this task scores $(2, 1, 2)$: the model must decide what matters across heterogeneous sections ($r=2$), everything to be summarized is in the note itself ($k=1$), and the summary must follow a structured clinical format while producing natural language ($o=2$).
+
+The comparison here is LLaMa-3-8B on a local NVIDIA A100 GPU (a data-center-class graphics processing unit) against GPT-4o via cloud API. Two selection facts should be on the table before the numbers. LLaMa-3-8B is used because it is the only model in the source's extractive comparison that fits the on-device deployment-budget definition of Section~1; it is also the \emph{weakest} of the sixteen models on this task's content-recall metric, so this vignette is a hard case for local deployment, not a representative one. And the best extractive model in the source was not the cloud reference at all but Gemma-3-27B (ROUGE-1 0.736 versus GPT-4o's 0.731), an open-weights model a large institution could self-host on data-center hardware; under a deployment budget that stretches to a 27B model on an A100, this task's verdict changes, which is exactly what a budget-relative envelope predicts.
+
+Against GPT-4o, the results split sharply by metric. On ROUGE-1 (unigram content recall), LLaMa-3-8B scored 0.535 versus 0.731, for an $AR = 0.73$, below even the lenient threshold: the local model's content-recall score was 27\% below the cloud baseline's. On BERTScore F1 (semantic similarity), it scored 0.828 versus 0.841, an $AR = 0.98$. On reported timing, the local model processed each note in 5.49 seconds versus 10.98 seconds for the cloud API, nominally $LE = 0.50$; this figure should be read cautiously, because the source reports single-number times whose measurement setting (cloud versus local) is not always identifiable, and for the two models it reports both ways the difference is roughly 28-fold.
+
+The gap between content recall ($AR = 0.73$) and semantic similarity ($AR = 0.98$) illustrates why metric selection is a governance decision with clinical consequences. For clinical summarization, where a missed medication or allergy in a discharge summary carries direct patient safety risk, content completeness (ROUGE-1) is arguably the more relevant standard, and under it FIT-SLM-HC places the task outside the envelope despite the latency advantage and semantic near-parity. For lower-risk uses where the overall gist matters more than exhaustive detail, the BERTScore AR suggests viability under human review. The contrast with Vignette~A is the framework's intended discriminative behavior: a $(1,2,1)$ extraction task holds 94\% of the reference's accuracy, while a $(2,1,2)$ summarization task loses 27\% of its content recall.
+
+%% ------------------------------------------------------------
+%% SECTION 3.4: VIGNETTE C
+%% ------------------------------------------------------------
+\subsection{Vignette C: The Reference Standard Flips the Verdict (Wearable Fatigue Prediction)}
+\label{sec:vignette-c}
+
+The third case is a fatigue prediction task from wearable data (HealthSLM-Bench \cite{Wang2025}). The model receives a 14-day window of Fitbit features and must output a single ordinal label (1--5). The task occupies the most constrained cell of the task space, $(1,1,1)$: pattern matching over structured numeric inputs ($r=1$), fully within the context window ($k=1$), deterministic output ($o=1$). By the Tier-2 mechanism this is exactly where an SLM should be most competitive, and the benchmark's zero-shot results bear that out in one direction while complicating it in another.
+
+Both verdicts below come from the same results table of the same source. Against the larger \emph{on-device} comparator in the benchmark (Llama-2-7B, 41.2\% accuracy), the best zero-shot SLM (Phi-3-mini-4k, 62.9\%) achieves $AR = 1.53$: on-device, small beats large. The same source, however, also evaluated cloud models zero-shot, and GPT-4 reached 72.2\% (GPT-3.5: 70.8\%), so against the framework's preferred cloud reference the same SLM scores $AR = 62.9/72.2 = 0.87$: below the 0.90 default threshold, inside only the lenient 0.80 envelope. On latency, the source reports time-to-first-token for on-device models only (6.39~s for Phi-3-mini-4k versus 29.12~s for Llama-2-7B on an iPhone 15 Pro Max), so the resulting $LE = 0.78$ describes the on-device comparison alone; no cloud latency is reported, and the formal LE of Equation~\ref{eq:le} against a cloud reference cannot be computed.
+
+The point of this vignette is not the fatigue task itself but the governance lesson: an envelope verdict is indexed to its reference standard: referencing the larger on-device alternative versus the best available cloud model turns $AR = 1.53$ into $AR = 0.87$ on identical outputs. An institution whose realistic alternative is a cloud API should compute AR against the cloud model; one whose alternative is a larger on-device model (for connectivity, cost, or policy reasons) should compute it against that. Either is a legitimate deployment analysis, but the choice must be stated, because transferring a verdict across reference standards silently converts a 53\% advantage into a 13\% deficit.
+%% ------------------------------------------------------------
+%% SECTION 3.5: EXTENDED APPLICATION
+%% ------------------------------------------------------------
+\subsection{Extended Application Across Published Benchmarks}
+\label{sec:extended}
+
+To characterize the framework's behavior beyond the three vignettes, FIT-SLM-HC was applied retrospectively to 22 unique healthcare tasks from 11 recent benchmark studies, using the identification and scoring procedure described in Section~\ref{sec:methods-retro}. For each task, the best-performing SLM and a cloud or larger reference model from the published results were identified, and the Accuracy Ratio was computed. Where inference latency was reported for both systems, Latency Efficiency was also computed. One study \cite{Grothey2025} additionally reported a 4-bit quantized variant of the same task, which is retained in Table~\ref{tab:extended} as a separate row (marked with $^c$) to illustrate configuration-level effects, yielding 23 evaluation rows in total. Table~\ref{tab:extended} reports the results, ordered by ascending axis sum, with each row carrying the reference model's adaptation regime and the adaptation-symmetry stratum used in the sensitivity analyses.
+
+\begin{table}[p]
+\centering
+\scriptsize
+\setlength{\tabcolsep}{3.5pt}
+\renewcommand{\arraystretch}{0.91}
+\caption{Extended FIT-SLM-HC application: 22 unique healthcare tasks from 11 benchmarks (23 rows; the marked row is a quantization variant), ordered by axis sum. AR = Accuracy Ratio (SLM $\div$ Reference); LE = Latency Efficiency; NR = not reported. Reg.\ = reference regime: ZS zero-shot, 3S 3-shot, FT fine-tuned, P prompted (shots not stated). Env.\ = verdict at the default $AR \geq 0.90$ in the source configuration ($\checkmark$ inside, $\times$ outside); sensitivity at 0.80/0.95 in Section~\ref{sec:results}. Most SLM entries are task-adapted while references were typically prompted (3-shot GPT-4 in the MedS-Bench rows; zero-shot for the USMLE row), an asymmetry favoring the SLM. Verdicts are a time-indexed 2024--2026 snapshot, indexed to the listed systems, references, and thresholds (Section~\ref{sec:scope}).}
+\label{tab:extended}
+\begin{tabular}{@{}p{2.05cm}lp{1.45cm}p{1.25cm}cccrrccl@{}}
+\toprule
+Task & Source & SLM & Ref. & Reg. & $(r,k,o)$ & Metric & SLM & Ref. & AR & LE & Env. \\
+\midrule
+\multicolumn{12}{@{}l}{\textit{Low complexity ($r{+}k{+}o = 3$)}} \\
+Report labeling & \cite{Zheng2026} & OPT-350M & GPT-4o & P & (1,1,1) & F1 & .894 & .728 & 1.23 & NR & $\checkmark$ \\
+Text classif. & \cite{Wu2025MedS} & Llama3-8B$^a$ & GPT-4 & 3S & (1,1,1) & F1 & 86.7 & 68.1 & 1.27 & NR & $\checkmark$ \\
+Info. extraction & \cite{Wu2025MedS} & Llama3-8B$^a$ & GPT-4 & 3S & (1,1,1) & Acc & 83.8 & 76.9 & 1.09 & NR & $\checkmark$ \\
+Stress detection & \cite{Hanafi2024} & Gemma 2 9B & GPT-4 & P & (1,1,1) & Acc & 72 & 70 & 1.03 & NR & $\checkmark$ \\
+\multicolumn{12}{@{}l}{\textit{Low--moderate complexity ($r{+}k{+}o = 4$)}} \\
+DICOM harmoniz. & \cite{Zheng2026} & OPT-350M & GPT-4o & P & (1,2,1) & Acc & .975 & .878 & 1.11 & NR & $\checkmark$ \\
+Clinical NER & \cite{Wu2025MedS} & Llama3-8B$^a$ & GPT-4 & 3S & (1,2,1) & F1 & 79.3 & 59.5 & 1.33 & NR & $\checkmark$ \\
+Pathology IE & \cite{Grothey2025} & Llama3-8B & GPT-4 & P & (1,2,1) & Acc & 91 & 97$^g$ & 0.94 & 0.54$^h$ & $\checkmark$ \\
+Pathology IE$^c$ & \cite{Grothey2025} & Llama3-8B 4-bit & GPT-4 & P & (1,2,1) & Acc & 69 & 97$^g$ & 0.71 & NR & $\times$ \\
+Clinical report IE & \cite{Liu2025ClinIE} & Llama-3.1-8B$^d$ & GPT-4 & ZS & (1,2,1) & EM & 90.0 & 86.1 & 1.05 & NR & $\checkmark$ \\
+Biomed.\ CLS (binary) & \cite{Dawood2025} & Qwen2.5-7B & Gemini 2.5 & P & (1,2,1) & Acc & 92 & 90 & 1.02 & NR & $\checkmark$ \\
+Depression detect. & \cite{Hanafi2024} & Gemma 2 9B & GPT-4 & P & (2,1,1) & Acc & 80.4 & 85.0 & 0.95 & NR & $\checkmark$ \\
+Suicide detect. & \cite{Hanafi2024} & Llama3-8B & GPT-4 & P & (2,1,1) & Acc & 58 & 70 & 0.83 & NR & $\times$ \\
+\multicolumn{12}{@{}l}{\textit{Moderate complexity ($r{+}k{+}o = 5$)}} \\
+Impression gen.$^e$ & \cite{Zheng2026} & OPT-350M & GPT-4o & P & (2,1,2) & Likert & 4.39 & 3.65 & 1.20 & NR & $\checkmark$ \\
+Diagnosis (DDXPlus) & \cite{Wu2025MedS} & Llama3-8B$^a$ & GPT-4 & 3S & (2,2,1) & Acc & 97.5 & 58.1 & 1.68 & NR & $\checkmark$ \\
+Treatment plan. & \cite{Wu2025MedS} & Llama3-8B$^a$ & GPT-4 & 3S & (2,2,1) & Acc & 98.5 & 84.7 & 1.16 & NR & $\checkmark$ \\
+ICD-10 coding & \cite{Hou2025} & Llama-1B$^b$ & GPT-4o mini$^b$ & FT & (2,2,1) & EM & $\sim$93 & $\sim$90 & $\approx$1.03 & NR & $\checkmark$ \\
+Radiology QA & \cite{Ranjit2024} & RadPhi-3 3.8B & GPT-4 & P & (2,2,1) & F1 & 40.3 & 34.0 & 1.19 & NR & $\checkmark$ \\
+DDI prediction & \cite{DeVito2025} & Phi-3.5 2.7B$^d$ & GPT-4o & P & (2,2,1) & Acc & .913 & .926 & 0.99 & NR & $\checkmark$ \\
+Biomed.\ CLS (3-class) & \cite{Dawood2025} & Llama3-8B & Gemini 2.5 & P & (2,2,1) & Acc & 70 & 90 & 0.78 & NR & $\times$ \\
+\multicolumn{12}{@{}l}{\textit{High complexity ($r{+}k{+}o \geq 6$) and composite}} \\
+Clinical triage & \cite{Wu2025MedS} & Llama3-8B$^a$ & GPT-4 & 3S & (3,2,1) & Acc & 63.1 & 60.1 & 1.05 & NR & $\checkmark$ \\
+Clinical IE (28)$^f$ & \cite{Builtjes2025} & Llama-3.1-8B & Llama-3.3-70B & ZS & (var.) & Utility & .588 & .760 & 0.77 & NR & $\times$ \\
+Medical exam QA & \cite{Kim2025} & Meerkat-7B & GPT-4 & P & (3,3,1) & Acc & 64.5 & 76.6 & 0.84 & NR & $\times$ \\
+Medical QA (USMLE) & \cite{Wu2025MedS} & Llama3-8B$^a$ & GPT-4 & ZS & (3,3,1) & Acc & 63.6 & 85.8 & 0.74 & NR & $\times$ \\
+\bottomrule
+\multicolumn{12}{@{}p{15.6cm}}{\scriptsize $^a$MMedIns-Llama 3-8B, instruction-tuned on the MedS-Ins corpus, whose task categories include those of the evaluation benchmark (Section~\ref{sec:methods-retro}); AR in these rows may partly reflect task-family exposure. $^b$Both models fine-tuned; AR approximate across test subsets. $^c$4-bit quantized variant of the same task and system; not counted as a unique task. $^d$Fine-tuned with LoRA. Model names/sizes are as printed in each source (e.g., ``Phi-3.5 2.7B'' is the DDI source's naming). $^e$Likert is ordinal; this AR (a ratio of mean ratings) is illustrative only. $^f$Composite DRAGON ``utility'' score over 28 heterogeneous Dutch-language clinical NLP tasks; no single axis profile; excluded from axis-based analyses. $^g$The source's text reports GPT-4 at ``over 97\%'' (a figure panel shows 98\%, which would give AR 0.93 and 0.70 with identical verdicts). English dataset. $^h$Midpoint of 5--6~s/report (local) vs.\ $\sim$12~s/report (GPT-4); as an interval, $LE = 0.50$--$0.58$.} \\
+\end{tabular}
+\end{table}
+
+%% ------------------------------------------------------------
+%% SECTION 3.6: RESULTS
+%% ------------------------------------------------------------
+\subsection{Descriptive Results and Sensitivity Analyses}
+\label{sec:results}
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=0.98\linewidth]{figure2_ar_scatter}
+  \caption{Accuracy Ratio against axis sum for the 21 axis-scored unique snapshot tasks (the composite row of Table~\ref{tab:extended} has no single axis profile and is not shown) (points spread horizontally within each axis sum for legibility; marker shape and color encode the adaptation-symmetry stratum; the hollow marker is the 4-bit quantization variant of Pathology IE, linked to its full-precision parent). Short gray bars mark the mean AR at each axis sum; dashed lines mark the three governance thresholds. The two features that drive every aggregate statistic are visible directly: the band from axis sum 3 to 6 is flat, and the drop occurs only at axis sum 7, which contains exactly two tasks, both open-domain medical exam QA.}
+  \label{fig:scatter}
+\end{figure}
+
+\paragraph{Headline counts.}
+Of the 18 unique tasks with axis sum $\leq 5$, 16 reached $AR \geq 0.90$ and 13 exceeded 1.0; in 11 of the 13, a fine-tuned or instruction-tuned SLM matched or beat a cloud-scale model outright, and in the remaining two a prompted-only SLM did. The most consistent results came from the most constrained tasks: report labeling, text classification, clinical named-entity recognition (NER; tagging mentions of drugs, diagnoses, and findings in text), and information extraction, all of which involve pulling structured outputs from bounded context. The three unique tasks at axis sum $\geq 6$ split one inside (clinical triage, $AR = 1.05$) and two outside (the exam-QA tasks, $AR = 0.84$ and $0.74$).
+
+\begin{table}[ht]
+\centering
+\small
+\caption{Descriptive statistics for AR by axis sum (21 axis-scored unique tasks; published pass-1 scores). ``Inside'' counts tasks at or above each AR threshold.}
+\label{tab:descriptives}
+\begin{tabular}{@{}crccccccc@{}}
+\toprule
+Axis sum & $n$ & Mean AR & Median & Min & Max & $\geq$0.80 & $\geq$0.90 & $\geq$0.95 \\
+\midrule
+3 & 4 & 1.16 & 1.16 & 1.03 & 1.27 & 4 & 4 & 4 \\
+4 & 7 & 1.03 & 1.02 & 0.83 & 1.33 & 7 & 6 & 5 \\
+5 & 7 & 1.15 & 1.16 & 0.78 & 1.68 & 6 & 6 & 6 \\
+6 & 1 & 1.05 & 1.05 & 1.05 & 1.05 & 1 & 1 & 1 \\
+7 & 2 & 0.79 & 0.79 & 0.74 & 0.84 & 1 & 0 & 0 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{What the distribution actually shows.}
+Table~\ref{tab:descriptives} and Figure~\ref{fig:scatter} carry the honest version of the aggregate pattern. Mean AR is flat and non-monotonic across axis sums 3 through 6 (1.16, 1.03, 1.15, 1.05; the mean at sum 5 exceeds the mean at sum 4) and drops only at axis sum 7. In plain terms: within the well-populated region of the snapshot, a task's axis sum does not order its AR; what the snapshot shows is that the two open-domain medical exam QA tasks sit apart from everything else. Since those two tasks are also the only tasks at $k=3$, the data cannot distinguish ``high axis sum'' from ``open-domain exam QA'' as the operative feature. Broken out by individual axis, reasoning complexity is the only axis with a monotone mean-AR gradient (1.12 at $r=1$, 1.09 at $r=2$, 0.88 at $r=3$; $n = 9/9/3$), though the step from $r=1$ to $r=2$ is negligible and two of the three $r=3$ tasks are the same exam-QA pair, so this gradient shares the confound just noted; knowledge boundedness is non-monotone in the populated range (1.09 at $k=1$, 1.11 at $k=2$; $n = 7/12$) and its $k=3$ level coincides with the exam-QA pair; and output structure admits no per-level comparison at all (20 tasks at $o=1$, one at $o=2$, none at $o=3$), so the $o$ mechanism of Section~\ref{sec:scope} remains untested by this snapshot.
+
+\paragraph{Threshold sensitivity.}
+Because the $AR \geq 0.90$ threshold is a governance choice rather than a universal constant, envelope membership was also computed at $AR \geq 0.80$ and $\geq 0.95$. Across the 22 unique tasks, 19 are inside at $AR \geq 0.80$, 17 at $\geq 0.90$, and 16 at $\geq 0.95$; among the 18 low-axis tasks the counts are 17, 16, and 15. Verdicts for two tasks flip between the lenient and default thresholds (suicide detection, $AR = 0.83$; medical exam QA, $AR = 0.84$) and for one between the default and strict thresholds (Pathology IE, $AR = 0.94$, the Vignette~A case). Stratified by adaptation symmetry, membership at $AR \geq 0.90$ is 12/14 in the SLM-favored subset and 5/8 in the symmetric subset; at $AR \geq 0.95$ the SLM-favored count is unchanged while the symmetric count drops to 4/8. The qualitative picture is stable across thresholds; specific task-level verdicts are sensitive to where the threshold sits and to which adaptation stratum is assumed.
+
+\paragraph{Sensitivity analyses.}
+Table~\ref{tab:sensitivity} recomputes the aggregate association between axis sum and envelope membership under the pre-specified perturbations of Section~\ref{sec:methods-retro}. (The test statistics themselves are exploratory; they are shown here only to make the fragility measurable. Appendix~\ref{app:tests} gives the full versions with confidence intervals and strata.)
+
+\begin{table}[ht]
+\centering
+\small
+\caption{Sensitivity of the axis-sum/envelope association ($AR \geq 0.90$; low = axis sum $\leq 5$, high = $\geq 6$; trend-eligible unique tasks). OR = odds ratio; CA = Cochran--Armitage trend test.}
+\label{tab:sensitivity}
+\begin{tabular}{@{}lccccc@{}}
+\toprule
+Analysis & $n$ & Low in/total & High in/total & Fisher $p$ & CA $p$ \\
+\midrule
+Pass-1 scores (published; not outcome-blind) & 21 & 16/18 & 1/3 & 0.080 & 0.017 \\
+Pass-2 scores (outcome-blind re-score) & 21 & 13/15 & 4/6 & 0.544 & 0.028 \\
+Axis-sum-7 tasks removed & 19 & 16/18 & 1/1 & 1.000 & 0.676 \\
+MedS-Bench cluster removed & 14 & 11/13 & 0/1 & 0.214 & 0.071 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Leave-one-study-out deletion tells the same story: the Fisher exact $p$-value exceeds 0.05 in every one of the ten study-deletion subsets (ten of the eleven source studies contribute trend-eligible tasks; range 0.051--0.284), and the trend statistic weakens most when the Kim et al.\ exam-QA study (CA $p = 0.086$) or the MedS-Bench cluster (CA $p = 0.071$) is removed. Enumerating all 126 subsamples that keep exactly one task per source study (10 tasks each), the trend test's $p$-value has median 0.036 with range 0.004--0.440, falling below 0.05 in 78 of 126 subsamples, while the Fisher $p$ has median 0.20. In plain terms: the appearance of a strong axis-sum effect in the full sample depends jointly on the non-blind first-pass scores, on the two exam-QA tasks, and on the seven-row MedS-Bench cluster. Under the outcome-blind re-score the dichotomized association collapses (odds ratio 16.0 to 3.25); the ordered trend survives re-scoring but vanishes entirely when the two axis-sum-7 tasks are removed. The claim this snapshot supports is descriptive: constrained extraction and classification tasks routinely reach or exceed cloud-reference accuracy under current adaptation practice, open-domain exam-style QA does not, and the region between them is unordered on present evidence.
+
+\paragraph{Scoring-procedure audit (same-rater, direction included).}
+\label{sec:audit}
+The audit covers the 22 axis-scoreable evaluation rows (the 21 unique tasks plus the quantization variant, which shares its parent's task profile), i.e., 66 axis assignments. The outcome-blind re-score agreed with the published scores on 82\% of rows for $r$, 82\% for $k$, and 100\% for $o$; Cohen's $\kappa$ was 0.71, 0.63, and 1.00 (linearly weighted: 0.77, 0.66, 1.00). These figures measure one rater's consistency across sittings, not inter-rater reliability, and the conventional verbal benchmarks for $\kappa$ are therefore not applied. More informative than the agreement level is its direction: all eight disagreements moved scores \emph{upward} on the blind pass (four on $r$: stress detection and binary biomedical classification from 1 to 2, DDXPlus diagnosis and treatment planning from 2 to 3; four on $k$: report labeling, depression detection, suicide detection, and impression generation from 1 to 2). Symmetric noise would scatter in both directions; a pooled 8--0 split has an exact two-sided sign-test $p = 0.008$, and Bowker's test of marginal homogeneity \cite{Bowker1948} flags the $k$ axis ($\chi^2 = 4.0$, $df = 1$, $p = 0.046$; for $r$: $\chi^2 = 4.0$, $df = 2$, $p = 0.14$). This is systematic drift in how the rubric was applied between sittings, concentrated at the $r$ 1/2, $r$ 2/3, and $k$ 1/2 boundaries, and $\kappa$ alone cannot see it. Three of the moved tasks (impression generation, DDXPlus diagnosis, treatment planning, all inside the envelope) cross the axis-sum 5/6 band boundary, which is what reverses the dichotomized association in Table~\ref{tab:sensitivity}. The practical conclusions are that the rubric language at those three boundaries needs sharpening before any multi-annotator study, and that analyses built on these scores must be read with the drift in view.
+
+\paragraph{Additional qualitative patterns.}
+Adaptation continues to act as an ``envelope expander,'' with the caveat that the largest effects come from the cluster where training-data overlap with the benchmark cannot be excluded. On DDXPlus differential diagnosis, the instruction-tuned 8B model outscored 3-shot GPT-4 by nearly 40 percentage points (97.5\% vs.\ 58.1\%; $AR = 1.68$); on clinical report extraction, a LoRA-tuned Llama-3.1-8B beat zero-shot GPT-4 by about four percentage points of exact match using only 100 training reports \cite{Liu2025ClinIE}; a LoRA-tuned Phi-3.5 at 2.7B parameters matched GPT-4o on drug--drug interaction prediction ($AR = 0.99$) \cite{DeVito2025}. Two within-band exceptions are instructive. Suicide risk detection ($AR = 0.83$) fell outside the envelope despite a low axis sum, most likely because detecting suicidal ideation requires sensitivity to implicit and ambiguous language cues that smaller models handle less reliably than they handle depression or stress detection on the same datasets; a per-axis reading (it is an $r=2$ task) fits the reasoning-axis gradient better than the axis-sum view does. Clinical triage ($AR = 1.05$ at axis sum 6) cuts the other way, suggesting that an instruction-tuned SLM can handle a high-complexity task when the output space stays constrained; both models scored only $\sim$60\% absolute, so the task is hard for every system involved.
+
+\paragraph{The latency reporting gap.}
+The most conspicuous gap in the source studies is the near-total absence of usable latency data. Across the thirteen studies examined (eleven extended-table sources plus the two additional vignette sources), only one, the pathology study of Vignette~A \cite{Grothey2025}, reports timing for both the local and the reference system in a form that supports the LE of Equation~\ref{eq:le}. The summarization study \cite{Naemi2025} reports per-note times for all models but in single numbers whose measurement setting is ambiguous (for the two models it reports both ways, cloud and local times differ roughly 28-fold), and the wearable study \cite{Wang2025} reports time-to-first-token for on-device models only. The rest report nothing quantitative or proxies that cannot support LE: aggregate API experiment costs (\$2.30 versus \$22.50), which reflect pricing tiers rather than speed \cite{Hanafi2024}; a model selected ``because of its faster inference speed'' without a number \cite{Kim2025}; per-paper times for the local models with the cloud reference untimed \cite{Dawood2025}; or a run-time analysis referenced to supplementary materials without quantitative timing in the paper \cite{Wu2025MedS}. Because usable LE exists for one extended-table task, the extended application is effectively one-dimensional (AR only), and the two-metric envelope is exercised end-to-end only in Vignette~A. The gap is not confined to a few papers; it reflects a field-wide norm in which accuracy is the evaluation dimension and operational efficiency, the quantity that determines whether a model is usable in a clinical workflow, goes unreported.
+
+%% ============================================================
+%% SECTION 4: DISCUSSION AND CONCLUSION
+%% ============================================================
+\section{Discussion and Conclusion}
+
+FIT-SLM-HC rests on the claim that language model deployment decisions in healthcare depend less on model size than on whether the task's constraints match the system's capabilities. The snapshot in Section~3 shows the framework organizing current evidence in a way that is useful and honest about its own limits: constrained extraction and classification tasks routinely reach cloud-reference accuracy under current adaptation practice, open-domain exam-style QA does not, the reasoning axis carries the clearest per-axis gradient, and the middle of the task space is unordered on present evidence. SLMs are not simply weaker versions of cloud models: on constrained extraction and classification tasks they function as efficient reasoning engines over supplied context. FIT-SLM-HC is a deployment triage layer on top of broader evaluation work, not a replacement for benchmarking, calibration, or safety assessment.
+
+Model turnover strengthens rather than weakens the case for this kind of framework. A published claim of the form ``model X achieves score Y on task Z'' begins to date the day the next model family ships; a procedure that re-derives the verdict for any task, system, and threshold does not. Under FIT-SLM-HC, an envelope verdict is explicitly indexed to a task, a system configuration (model, adaptation, quantization, hardware), a reference standard, a set of governance thresholds, and a measurement date. Vignette~C makes the reference-standard index concrete: the same model on the same task scores $AR = 1.53$ against its on-device comparator and $0.87$ against the cloud baseline in the same benchmark table. Institutions should treat verdicts as perishable measurements to be recomputed when models or hardware change, not as durable properties of task types. The durable parts of the framework are the measurement procedure and the directional mechanism (Tiers 1 and 2 in Section~\ref{sec:scope}); the expectation that improving small models will move the boundary outward while leaving the per-axis ordering intact is itself testable by re-running the procedure across model generations.
+
+In practice, the framework comes down to three steps, and it is worth being precise about what each contributes. First, score the candidate task on the $(r, k, o)$ axes: this sets expectations, orders the evaluation queue, and flags where to look hardest; on present evidence it licenses no verdict by itself. Second, establish a reference standard on a small evaluation set, naming the reference deliberately (Vignette~C): preferably a frontier cloud LLM under deployment conditions, or, where the realistic alternative is different, that alternative, clearly labeled. Third, run the candidate system on the same set and compute AR, LE, and the absolute latency check. The measurement in steps two and three renders the verdict; deploy only if the organization's thresholds are met.
+
+To make this procedure easier to apply, a companion open-source web tool \cite{Williams2026FITSLMHCTool} walks users through all three steps as an interactive static-site application. No server is needed. Users score a candidate task on the $(r, k, o)$ axes, enter their SLM and reference model performance numbers, and optionally provide latency data. The tool computes AR and LE in real time, plots the user's task alongside the snapshot tasks of Table~\ref{tab:extended}, and returns an envelope verdict against adjustable governance thresholds (inside; borderline, meaning within 0.05 below the AR threshold; or outside). Because the tool runs entirely client-side with no data leaving the browser, it is usable in institutional environments with strict data transmission policies, and because its inputs are user-supplied measurements rather than stored model profiles, it remains usable as new models are released; the bundled reference dataset is the Tier-3 snapshot, versioned to this revision. The tool is a first-pass triage aid: it does not replace the benchmarking and safety assessment that should follow a positive envelope verdict.
+
+Healthcare has several features that make this kind of structured assessment particularly necessary. The compliance picture is more nuanced than a simple local-versus-cloud dichotomy. As noted in Section~1, cloud LLM endpoints can be operated under a Business Associate Agreement \cite{HHSBAA, Marks2023HIPAAAI}, and de-identification pipelines can strip PHI before cloud transmission for certain task types \cite{Kovacevic2024DeID}. Equally, local SLM deployment eliminates the transmission vector but does not confer automatic compliance: the HIPAA Security Rule still requires access controls, encryption, audit logging, and workforce training on any system that touches PHI \cite{HHS2013SecurityRule}. FIT-SLM-HC does not make compliance determinations. Its role is to quantify the performance side of the trade-off so that organizations, once they have addressed the regulatory requirements for whichever deployment path they choose, can make an informed decision about whether the local model is accurate and fast enough for the task at hand. The clinical risk spectrum is also wide: an SLM prediction error on a wearable wellness score is not equivalent to a missed medication in a discharge summary. The framework keeps those concerns separate: the axis scores capture the capability demand of the task, while the clinical stakes enter through where the institution sets its AR threshold and its metric (Vignette~B). Healthcare workflows also frequently include human review, which can compensate for moderate AR deficits on lower-risk tasks; the framework accommodates this by letting organizations set thresholds based on how feasible human-in-the-loop oversight is for a given task.
+
+FIT-SLM-HC applies to redesigned workflows too, not just tasks as originally scoped. Retrieval augmentation (supplying the model with relevant reference text in the prompt at question time \cite{Lewis2020}), constrained forms, structured extraction targets, and templated outputs can all lower the effective knowledge or output burden of a task and pull it toward the envelope. Fallback rules such as abstention or human escalation do not eliminate risk, but they can shift the practical threshold at which a borderline task becomes deployable. Per-query routing and cascading (Section~\ref{sec:related}) can then operate inside the region a task-level analysis clears for local deployment.
+
+The framework is deliberately limited in scope. It does not treat cost, energy, security, or equity as co-equal quantitative axes, and it does not collapse AR and LE into a single utility score. Those factors matter in healthcare governance, but the aim here is a simple first-pass decision structure that institutions can layer with their own policy, procurement, and safety requirements.
+
+\paragraph{Limitations.}
+Several limitations should be made explicit, roughly in order of how much they constrain interpretation. First, the axis scoring: it is single-rater, the rater designed the framework, and the published (pass-1) scores were assigned with the outcome values in view. The outcome-blind re-score shifted eight of 66 axis assignments, every one of them upward, moved three inside-envelope tasks across the 5/6 band boundary, and reversed the dichotomized axis-sum association (Table~\ref{tab:sensitivity}); the same-rater $\kappa$ values reported in Section~\ref{sec:audit} measure consistency across sittings, not reliability, and the one-directional drift means even they overstate stability. A blinded multi-annotator study, with rubric language sharpened at the $r$~1/2, $r$~2/3, and $k$~1/2 boundaries, is required before the axis scores can be treated as measurements. Second, the sample: the 11 source studies were identified by convenience search, the 22 tasks cluster by source (seven from one study and one SLM checkpoint), and the high-axis region contains three unique tasks, so no inferential statement about the axis-sum gradient is supportable; the paper accordingly makes none, and the exploratory tests in Appendix~\ref{app:tests} are labeled as such. Third, provenance of the strongest results: most SLM entries are fine-tuned or instruction-tuned against prompted references (3-shot GPT-4 in the largest cluster), and the instruction corpus of that cluster's SLM overlaps the benchmark's task families with no held-out protocol described, so the largest AR values may partly reflect task exposure; the MedS-excluded sensitivity row bounds this concern without eliminating it. Fourth, the metrics: AR is computed across incommensurable metric families (F1, accuracy, exact match, ROUGE-1, BERTScore, Likert, a composite utility), Likert-based AR in particular is illustrative only, and the composite Dutch-language row aggregates 28 heterogeneous tasks. Fifth, latency: usable LE exists for one extended-table task, so the two-dimensional envelope is exercised only in Vignette~A, and the vignettes use heterogeneous hardware and latency definitions, acceptable for illustration but not for comparative claims. Sixth, coverage: the output-structure axis is untested (20/1/0), the $k=3$ level coincides with the two exam-QA tasks, and the equal-weight axis sum is a reporting convenience the mechanism does not justify, which is why the per-axis view is primary. Finally, the Tier-3 snapshot is time-indexed by design: its verdicts are expected to date as models improve, and whether the Tier-2 ordering persists across generations is an empirical question that re-application of the procedure can answer. Extending the framework to cost, energy, and subgroup fairness reporting, and evaluating how retrieval augmentation, structured prompting, and abstention policies reshape effective task coordinates, are natural next steps.
+
+\paragraph{Latency reporting in healthcare AI benchmarks.}
+FIT-SLM-HC treats AR and LE as co-equal governance signals, yet only one of the thirteen studies examined here reports timing for both systems in a form that allows LE computation, and only two others report timing for even one side of the comparison. Aggregate API costs conflate pricing policy with throughput; qualitative claims about ``faster inference'' lack the numbers needed for threshold-based decisions; single-number timings without a stated measurement setting cannot be compared across systems; and local-only timings leave the LE denominator empty. In healthcare, where response time affects clinical workflow integration, patient throughput, and clinician trust, this omission matters. Future healthcare AI benchmarks should report, at minimum, the median and interquartile range of per-query wall-clock time (or tokens per second) for each model, under a stated measurement setting and matched input conditions, alongside the accuracy metrics already considered standard. Until this happens, half of the FIT-SLM-HC decision surface will remain empirically inaccessible.
+
+To conclude, FIT-SLM-HC extends evaluation beyond purely technical accuracy benchmarks to task-level assessment of on-device language models in healthcare. By separating task properties from system metrics, separating what is model-invariant from what is a dated measurement, and insisting that the reference standard, the metric, and the thresholds be named, it gives organizations a way to deploy SLMs where they add value (preserving privacy and cutting cost), to avoid them where they would introduce clinical risk, and to remake that decision each time the available models change.
+
+%% ============================================================
+%% DECLARATIONS
+%% ============================================================
+\section*{Declarations}
+
+\subsection*{Funding}
+This work received no specific funding from any public, commercial, or not-for-profit agency.
+
+\subsection*{Competing Interests}
+The author declares no competing interests.
+
+\subsection*{Ethics Approval}
+Not applicable. This study analyzed previously published, aggregate benchmark results; no human participants, patient records, or identifiable data were involved.
+
+\subsection*{Author Contributions}
+H.W.\ conceived the framework, performed the literature identification and task scoring, conducted the analyses, developed the companion tool, and wrote the manuscript.
+
+\subsection*{Use of Artificial Intelligence}
+Generative AI (Anthropic Claude) assisted with drafting, reference verification, and figure generation; the author verified all content and takes full responsibility.
+
+\subsection*{Data Availability}
+No new clinical data were collected for this study; all performance figures are drawn from previously published benchmark results cited in the text. All materials supporting this paper are in a single public repository at \url{https://github.com/hantswilliams/fit-slm-hc}: the manuscript source (\texttt{manuscript/}), the analysis scripts, both scoring passes, the sensitivity suite, and all generated outputs supporting Section~3 (\texttt{analysis/}), a bibliography verification script, and the companion FIT-SLM-HC decision tool (\texttt{docs/}), an open-source static web application whose live, browser-based version is deployed at \url{https://hantswilliams.github.io/fit-slm-hc/}. Earlier drafts and additional exploratory materials from the framework's development are held in a separate private working repository and are available from the author on reasonable request.
+
+%% ============================================================
+%% APPENDIX
+%% ============================================================
+\appendix
+
+\section{Exploratory Association Tests}
+\label{app:tests}
+
+This appendix reports the formal association statistics between axis sum and envelope membership. They are labeled exploratory because three conditions for valid inference fail here: the observations cluster by source study (Section~\ref{sec:methods-retro}), the published axis scores were not assigned blind to the outcome, and the high-axis region contains too few tasks for the tests to be stable (Table~\ref{tab:sensitivity}). Two tests of the same hypothesis are shown, which is itself a multiplicity the reader should keep in view; their disagreement in the full sample (the trend test is more sensitive precisely because it leans on the sparse ordered tail) is diagnostic of that fragility.
+
+Each analysis dichotomizes tasks at axis sum $\leq 5$ versus $\geq 6$ and at $AR \geq 0.90$, and reports a two-sided Fisher exact test, an odds ratio with a Woolf 95\% confidence interval (Haldane--Anscombe 0.5 correction when a cell is zero), and a Cochran--Armitage trend test across ordered axis sums. On the published pass-1 scores, the full trend-eligible sample ($n = 21$) gives Fisher $p = 0.080$ with $OR = 16.0$ (95\% CI $[0.96,\,267.0]$, crossing 1) and Cochran--Armitage $z = -2.39$, $p = 0.017$. In the SLM-favored stratum ($n = 14$): Fisher $p = 0.033$, $OR = 38.3$ (corrected 95\% CI $[1.18,\,1245.0]$), $z = -2.73$, $p = 0.006$. In the symmetric stratum ($n = 7$) no high-axis comparisons exist in the sampled literature, so the $2{\times}2$ statistics are not computable; the trend test across the observed axis sums (3, 4, 5) gives $z = -0.94$, $p = 0.35$, against mean AR of 1.03, 0.94, and 0.91. The extremely wide confidence intervals are the arithmetic signature of the sparse high-axis cells. Under the outcome-blind pass-2 scores the full-sample statistics become Fisher $p = 0.544$, $OR = 3.25$, $z = -2.20$, $p = 0.028$; removing the two axis-sum-7 tasks leaves $z = -0.42$, $p = 0.68$ (Table~\ref{tab:sensitivity}). Regenerated outputs for every analysis in this appendix, including the leave-one-study-out and one-task-per-study enumerations, are in \texttt{aug28/analysis/outputs/} in the companion repository.
+
+%% ============================================================
+%% REFERENCES
+%% ============================================================
+\bibliographystyle{unsrtnat}
+\bibliography{references}
+
+\end{document}

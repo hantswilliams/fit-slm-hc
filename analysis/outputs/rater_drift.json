@@ -1,0 +1,146 @@
+{
+  "n_tasks_scored_by_both_passes": 22,
+  "per_axis": {
+    "r": {
+      "crosstab": {
+        "1->1": 8,
+        "1->2": 2,
+        "2->2": 7,
+        "2->3": 2,
+        "3->3": 3
+      },
+      "n_disagreements": 4,
+      "n_up": 4,
+      "n_down": 0,
+      "sign_test_p_two_sided": 0.125,
+      "bowker_marginal_homogeneity": {
+        "chi2": 4.0,
+        "df": 2,
+        "p": 0.135335
+      },
+      "disagreements": [
+        {
+          "task_id": "T04",
+          "task_name": "Stress detection",
+          "pass1": 1,
+          "pass2": 2,
+          "direction": "up"
+        },
+        {
+          "task_id": "T10",
+          "task_name": "Biomedical literature CLS (binary)",
+          "pass1": 1,
+          "pass2": 2,
+          "direction": "up"
+        },
+        {
+          "task_id": "T14",
+          "task_name": "Differential diagnosis (DDXPlus)",
+          "pass1": 2,
+          "pass2": 3,
+          "direction": "up"
+        },
+        {
+          "task_id": "T15",
+          "task_name": "Treatment planning",
+          "pass1": 2,
+          "pass2": 3,
+          "direction": "up"
+        }
+      ]
+    },
+    "k": {
+      "crosstab": {
+        "1->1": 3,
+        "1->2": 4,
+        "2->2": 13,
+        "3->3": 2
+      },
+      "n_disagreements": 4,
+      "n_up": 4,
+      "n_down": 0,
+      "sign_test_p_two_sided": 0.125,
+      "bowker_marginal_homogeneity": {
+        "chi2": 4.0,
+        "df": 1,
+        "p": 0.0455
+      },
+      "disagreements": [
+        {
+          "task_id": "T01",
+          "task_name": "Report labeling",
+          "pass1": 1,
+          "pass2": 2,
+          "direction": "up"
+        },
+        {
+          "task_id": "T11",
+          "task_name": "Depression detection",
+          "pass1": 1,
+          "pass2": 2,
+          "direction": "up"
+        },
+        {
+          "task_id": "T12",
+          "task_name": "Suicide detection",
+          "pass1": 1,
+          "pass2": 2,
+          "direction": "up"
+        },
+        {
+          "task_id": "T13",
+          "task_name": "Impression generation",
+          "pass1": 1,
+          "pass2": 2,
+          "direction": "up"
+        }
+      ]
+    },
+    "o": {
+      "crosstab": {
+        "1->1": 21,
+        "2->2": 1
+      },
+      "n_disagreements": 0,
+      "n_up": 0,
+      "n_down": 0,
+      "sign_test_p_two_sided": 1.0,
+      "bowker_marginal_homogeneity": {
+        "chi2": null,
+        "df": 0,
+        "p": null
+      },
+      "disagreements": []
+    }
+  },
+  "pooled": {
+    "n_disagreements": 8,
+    "n_up": 8,
+    "n_down": 0,
+    "sign_test_p_two_sided": 0.0078
+  },
+  "band_movers_5_to_6": [
+    {
+      "task_id": "T13",
+      "task_name": "Impression generation",
+      "sum_pass1": 5,
+      "sum_pass2": 6,
+      "ar": 1.2
+    },
+    {
+      "task_id": "T14",
+      "task_name": "Differential diagnosis (DDXPlus)",
+      "sum_pass1": 5,
+      "sum_pass2": 6,
+      "ar": 1.68
+    },
+    {
+      "task_id": "T15",
+      "task_name": "Treatment planning",
+      "sum_pass1": 5,
+      "sum_pass2": 6,
+      "ar": 1.16
+    }
+  ],
+  "note": "Both passes come from the same rater; pass 1 (published) was assigned with AR visible, pass 2 was AR-blind. One-directional drift means kappa alone overstates the stability of the scoring."
+}

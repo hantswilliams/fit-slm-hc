@@ -1,0 +1,24 @@
+task_id,task_name,source_citekey,slm_model,reference_model,reasoning_r,knowledge_k,output_o,axis_sum,metric,slm_score,ref_score,ar,le,is_variant,adaptation_symmetry
+T01,Report labeling,Zheng2026,OPT-350M,GPT-4o,1,1,1,3,F1,0.894,0.728,1.23,,0,slm_favored
+T02,Text classification,Wu2025MedS,MMedIns-Llama3-8B,GPT-4,1,1,1,3,F1,86.7,68.1,1.27,,0,slm_favored
+T03,Information extraction,Wu2025MedS,MMedIns-Llama3-8B,GPT-4,1,1,1,3,Acc,83.8,76.9,1.09,,0,slm_favored
+T04,Stress detection,Hanafi2024,Gemma 2 9B,GPT-4,1,1,1,3,Acc,72,70,1.03,,0,symmetric
+T05,DICOM harmonization,Zheng2026,OPT-350M,GPT-4o,1,2,1,4,Acc,0.975,0.878,1.11,,0,slm_favored
+T06,Clinical NER,Wu2025MedS,MMedIns-Llama3-8B,GPT-4,1,2,1,4,F1,79.3,59.5,1.33,,0,slm_favored
+T07,Pathology IE,Grothey2025,Llama3-8B,GPT-4,1,2,1,4,Acc,91,97,0.94,0.54,0,symmetric
+T08,Pathology IE (4-bit variant),Grothey2025,Llama3-8B 4-bit,GPT-4,1,2,1,4,Acc,69,97,0.71,,1,symmetric
+T09,Clinical report IE,Liu2025ClinIE,Llama-3.1-8B LoRA,GPT-4,1,2,1,4,EM,90.0,86.1,1.05,,0,slm_favored
+T10,Biomedical literature CLS (binary),Dawood2025,Qwen2.5-7B,Gemini 2.5,1,2,1,4,Acc,92,90,1.02,,0,symmetric
+T11,Depression detection,Hanafi2024,Gemma 2 9B,GPT-4,2,1,1,4,Acc,80.4,85.0,0.95,,0,symmetric
+T12,Suicide detection,Hanafi2024,Llama3-8B,GPT-4,2,1,1,4,Acc,58,70,0.83,,0,symmetric
+T13,Impression generation,Zheng2026,OPT-350M,GPT-4o,2,1,2,5,Likert,4.39,3.65,1.20,,0,slm_favored
+T14,Differential diagnosis (DDXPlus),Wu2025MedS,MMedIns-Llama3-8B,GPT-4,2,2,1,5,Acc,97.5,58.1,1.68,,0,slm_favored
+T15,Treatment planning,Wu2025MedS,MMedIns-Llama3-8B,GPT-4,2,2,1,5,Acc,98.5,84.7,1.16,,0,slm_favored
+T16,ICD-10 coding,Hou2025,Llama-1B (fine-tuned),GPT-4o mini (fine-tuned),2,2,1,5,EM,93,90,1.03,,0,symmetric
+T17,Radiology QA,Ranjit2024,RadPhi-3 3.8B,GPT-4,2,2,1,5,F1,40.3,34.0,1.19,,0,slm_favored
+T18,DDI prediction,DeVito2025,Phi-3.5 2.7B LoRA,GPT-4o,2,2,1,5,Acc,0.913,0.926,0.99,,0,slm_favored
+T19,Biomedical literature CLS (3-class),Dawood2025,Llama3-8B,Gemini 2.5,2,2,1,5,Acc,70,90,0.78,,0,symmetric
+T20,Clinical triage,Wu2025MedS,MMedIns-Llama3-8B,GPT-4,3,2,1,6,Acc,63.1,60.1,1.05,,0,slm_favored
+T21,Clinical IE composite (28 tasks),Builtjes2025,Llama-3.1-8B,Llama-3.3-70B,,,,,Utility,0.588,0.760,0.77,,0,symmetric
+T22,Medical exam QA,Kim2025,Meerkat-7B,GPT-4,3,3,1,7,Acc,64.5,76.6,0.84,,0,slm_favored
+T23,Medical QA (USMLE),Wu2025MedS,MMedIns-Llama3-8B,GPT-4,3,3,1,7,Acc,63.6,85.8,0.74,,0,slm_favored

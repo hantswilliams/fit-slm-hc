@@ -1,0 +1,25 @@
+FIT-SLM-HC Inter-Rater Reliability Summary
+==============================================
+Tasks scored by both raters: 22
+
+Reasoning Complexity (r)
+  Percent agreement:      0.818
+  Cohen's kappa (unwtd):  0.714 (same-rater; no benchmark gloss)
+  Cohen's kappa (linear): 0.770 (same-rater; no benchmark gloss)
+
+Knowledge Boundedness (k)
+  Percent agreement:      0.818
+  Cohen's kappa (unwtd):  0.630 (same-rater; no benchmark gloss)
+  Cohen's kappa (linear): 0.659 (same-rater; no benchmark gloss)
+
+Output Structure (o)
+  Percent agreement:      1.000
+  Cohen's kappa (unwtd):  1.000 (same-rater; no benchmark gloss)
+  Cohen's kappa (linear): 1.000 (same-rater; no benchmark gloss)
+
+Pooled across axes
+  Percent agreement:      0.879
+  Cohen's kappa (unwtd):  0.787 (same-rater; no benchmark gloss)
+  Cohen's kappa (linear): 0.819 (same-rater; no benchmark gloss)
+
+Note: Both passes were produced by the same author. Pass 1 (published scores) was assigned with AR values visible; pass 2 was an AR-blind delayed re-read of the task descriptions. These figures measure one rater's consistency across sittings, not inter-rater reliability, and kappa is blind to direction: all eight disagreements moved scores upward (see rater_drift outputs).

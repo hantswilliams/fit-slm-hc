@@ -1,0 +1,23 @@
+task_id,task_name,reasoning_r,knowledge_k,output_o
+T01,Report labeling,1,1,1
+T02,Text classification,1,1,1
+T03,Information extraction,1,1,1
+T04,Stress detection,1,1,1
+T05,DICOM harmonization,1,2,1
+T06,Clinical NER,1,2,1
+T07,Pathology IE,1,2,1
+T08,Pathology IE (4-bit variant),1,2,1
+T09,Clinical report IE,1,2,1
+T10,Biomedical literature CLS (binary),1,2,1
+T11,Depression detection,2,1,1
+T12,Suicide detection,2,1,1
+T13,Impression generation,2,1,2
+T14,Differential diagnosis (DDXPlus),2,2,1
+T15,Treatment planning,2,2,1
+T16,ICD-10 coding,2,2,1
+T17,Radiology QA,2,2,1
+T18,DDI prediction,2,2,1
+T19,Biomedical literature CLS (3-class),2,2,1
+T20,Clinical triage,3,2,1
+T22,Medical exam QA,3,3,1
+T23,Medical QA (USMLE),3,3,1

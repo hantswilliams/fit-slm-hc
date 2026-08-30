@@ -1,0 +1,21 @@
+cff-version: 1.2.0
+message: "If you use this framework or the decision tool, please cite the preprint."
+title: "FIT-SLM-HC: A Task-Technology Fit Framework for Identifying Tasks Suited to Small Language Models in Healthcare"
+authors:
+  - family-names: Williams
+    given-names: Hants
+    affiliation: "Stony Brook University, Stony Brook, NY, USA"
+    email: hants.williams@stonybrook.edu
+repository-code: "https://github.com/hantswilliams/fit-slm-hc"
+url: "https://hantswilliams.github.io/fit-slm-hc/"
+license: MIT
+date-released: 2026-08-30
+preferred-citation:
+  type: article
+  title: "FIT-SLM-HC: A Task-Technology Fit Framework for Identifying Tasks Suited to Small Language Models in Healthcare"
+  authors:
+    - family-names: Williams
+      given-names: Hants
+  year: 2026
+  journal: "JMIR Preprints"
+  notes: "DOI to be added upon preprint deposit"

@@ -1,0 +1,39 @@
+FIT-SLM-HC Sensitivity Suite (aug28 revision)
+==============================================
+AR threshold: 0.9; low = axis sum <= 5, high = >= 6
+
+(a) Scoring-pass sensitivity
+  pass-1 (published)         n=21  low 16/18  high 1/3  OR= 16.00  Fisher p=0.080  CA z= -2.39 p=0.017
+  pass-2 (AR-blind)          n=21  low 13/15  high 4/6  OR=  3.25  Fisher p=0.544  CA z= -2.20 p=0.028
+  Band movers (5 -> 6): Impression generation (AR 1.2), Differential diagnosis (DDXPlus) (AR 1.68), Treatment planning (AR 1.16)
+
+(b) Clustering sensitivity - leave one study out
+  minus Dawood2025           n=19  low 15/16  high 1/3  OR= 30.00  Fisher p=0.051  CA z= -2.34 p=0.019
+  minus DeVito2025           n=20  low 15/17  high 1/3  OR= 15.00  Fisher p=0.088  CA z= -2.41 p=0.016
+  minus Grothey2025          n=20  low 15/17  high 1/3  OR= 15.00  Fisher p=0.088  CA z= -2.31 p=0.021
+  minus Hanafi2024           n=18  low 14/15  high 1/3  OR= 28.00  Fisher p=0.056  CA z= -2.74 p=0.006
+  minus Hou2025              n=20  low 15/17  high 1/3  OR= 15.00  Fisher p=0.088  CA z= -2.41 p=0.016
+  minus Kim2025              n=20  low 16/18  high 1/2  OR=  8.00  Fisher p=0.284  CA z= -1.72 p=0.086
+  minus Liu2025ClinIE        n=20  low 15/17  high 1/3  OR= 15.00  Fisher p=0.088  CA z= -2.31 p=0.021
+  minus Ranjit2024           n=20  low 15/17  high 1/3  OR= 15.00  Fisher p=0.088  CA z= -2.41 p=0.016
+  minus Wu2025MedS           n=14  low 11/13  high 0/1  OR= 13.80  Fisher p=0.214  CA z= -1.81 p=0.071
+  minus Zheng2026            n=18  low 13/15  high 1/3  OR= 13.00  Fisher p=0.108  CA z= -2.22 p=0.026
+
+(b') One task per study: 126 combinations of 10 tasks
+  Cochran-Armitage p: median 0.0356, range [0.0035, 0.4404]; 78/126 below 0.05
+  Fisher p:           median 0.2, range [0.0222, 1.0]
+
+(c) Axis-sum-7 tasks removed
+  drop sum-7 (n-2)           n=19  low 16/18  high 1/1  OR=  2.20  Fisher p=1.000  CA z= -0.42 p=0.676
+
+(d) MedS-Bench rows removed
+  minus Wu2025MedS           n=14  low 11/13  high 0/1  OR= 13.80  Fisher p=0.214  CA z= -1.81 p=0.071
+
+Reading:
+  The 2x2 association (OR 16.0) collapses under the AR-blind pass-2
+  scores (OR 3.25, Fisher p 0.54). The Cochran-Armitage trend is
+  less fragile there (p 0.028) but rests entirely on the two
+  axis-sum-7 tasks: removing them leaves z = -0.42, p = 0.68. The
+  trend also weakens most when the Kim or Wu (MedS-Bench) studies
+  are left out, and Fisher p exceeds 0.05 in every LOSO subset.
+  These are the facts the descriptive presentation reports.

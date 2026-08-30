@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FIT-SLM-HC Decision Tool</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header>
+  <div class="container">
+    <h1>FIT-SLM-HC Decision Tool</h1>
+    <p class="subtitle">Task-Technology Fit Framework for Small Language Models in Healthcare</p>
+    <p class="attribution">Based on the FIT-SLM-HC framework &mdash; see citation below</p>
+    <button class="about-toggle">About this tool</button>
+    <div class="about-content">
+      <p>This tool implements the three-step deployment-triage procedure from the FIT-SLM-HC framework. It helps healthcare organizations decide whether a candidate clinical task is suitable for a Small Language Model (SLM) deployed on local hardware, or whether a cloud-based Large Language Model (LLM) is required.</p>
+      <p>Score your task on three axes, enter your benchmark results, and the tool will compute an Accuracy Ratio (AR) and optional Latency Efficiency (LE), then compare your task against 25 benchmarked healthcare task configurations from the source manuscript (aug28 snapshot: 23 extended-table evaluation rows covering 22 unique tasks and one quantization variant, plus 2 vignette-only rows; one extended-table row, Pathology IE, is also Vignette A).</p>
+    </div>
+  </div>
+</header>
+
+<main class="container">
+
+  <!-- Step 1: Task-Side Scoring -->
+  <section class="card" id="step1">
+    <div class="step-label">Step 1</div>
+    <h2>Score Your Task</h2>
+    <p class="description">Characterize the candidate task on three axes. Score the dominant requirement of the intended workflow under normal operating conditions. When a task spans two levels, assign the higher (more conservative) level.</p>
+
+    <div class="axis-group">
+      <div class="axis-label">Reasoning Complexity (r) <span>&mdash; number of logical steps from input to output</span></div>
+      <div class="axis-options">
+        <div class="axis-option" data-level="1">
+          <input type="radio" name="r" id="r1" value="1">
+          <label for="r1">
+            <span class="level">1</span>
+            <span class="level-name">Direct Extraction</span>
+            <span class="level-desc">Answer exists verbatim in the text (zero-step)</span>
+          </label>
+        </div>
+        <div class="axis-option" data-level="2">
+          <input type="radio" name="r" id="r2" value="2">
+          <label for="r2">
+            <span class="level">2</span>
+            <span class="level-name">Interpretation</span>
+            <span class="level-desc">Requires rephrasing or categorizing (single-step logic)</span>
+          </label>
+        </div>
+        <div class="axis-option" data-level="3">
+          <input type="radio" name="r" id="r3" value="3">
+          <label for="r3">
+            <span class="level">3</span>
+            <span class="level-name">Synthesis</span>
+            <span class="level-desc">Connecting multiple ideas (multi-step / external logic)</span>
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <div class="axis-group">
+      <div class="axis-label">Knowledge Boundedness (k) <span>&mdash; reliance on stored vs. provided knowledge</span></div>
+      <div class="axis-options">
+        <div class="axis-option" data-level="1">
+          <input type="radio" name="k" id="k1" value="1">
+          <label for="k1">
+            <span class="level">1</span>
+            <span class="level-name">Closed-Domain</span>
+            <span class="level-desc">All information is within the context window</span>
+          </label>
+        </div>
+        <div class="axis-option" data-level="2">
+          <input type="radio" name="k" id="k2" value="2">
+          <label for="k2">
+            <span class="level">2</span>
+            <span class="level-name">Domain-Specific</span>
+            <span class="level-desc">Requires specialized or technical knowledge</span>
+          </label>
+        </div>
+        <div class="axis-option" data-level="3">
+          <input type="radio" name="k" id="k3" value="3">
+          <label for="k3">
+            <span class="level">3</span>
+            <span class="level-name">Open-Domain</span>
+            <span class="level-desc">Relies on broad world knowledge or events</span>
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <div class="axis-group">
+      <div class="axis-label">Output Structure (o) <span>&mdash; constraints on the output format</span></div>
+      <div class="axis-options">
+        <div class="axis-option" data-level="1">
+          <input type="radio" name="o" id="o1" value="1">
+          <label for="o1">
+            <span class="level">1</span>
+            <span class="level-name">Deterministic</span>
+            <span class="level-desc">Fixed format (JSON, binary, labels)</span>
+          </label>
+        </div>
+        <div class="axis-option" data-level="2">
+          <input type="radio" name="o" id="o2" value="2">
+          <label for="o2">
+            <span class="level">2</span>
+            <span class="level-name">Templated</span>
+            <span class="level-desc">Constrained free-text with formatting rules</span>
+          </label>
+        </div>
+        <div class="axis-option" data-level="3">
+          <input type="radio" name="o" id="o3" value="3">
+          <label for="o3">
+            <span class="level">3</span>
+            <span class="level-name">Creative</span>
+            <span class="level-desc">Open-ended generation (quality, tone, novelty)</span>
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <div id="axis-sum" class="axis-sum">Axis Sum: select all three axes</div>
+    <p class="scoring-note">Score the task as it will be deployed, including any retrieval augmentation, templating, or workflow constraints that change the effective demands on the model.</p>
+  </section>
+
+  <!-- Step 2: System-Side Metrics -->
+  <section class="card" id="step2">
+    <div class="step-label">Step 2</div>
+    <h2>Enter System Metrics</h2>
+    <p class="description">Enter your SLM and reference model performance scores on the same metric to compute the Accuracy Ratio. Use the same evaluation set for both.</p>
+
+    <div class="metric-row">
+      <div class="metric-field">
+        <label for="slm-score">SLM Performance Score</label>
+        <input type="number" id="slm-score" step="any" min="0" placeholder="e.g. 0.894 or 91.0">
+      </div>
+      <div class="metric-field">
+        <label for="ref-score">Reference Model Score</label>
+        <input type="number" id="ref-score" step="any" min="0" placeholder="e.g. 0.728 or 98.0">
+      </div>
+      <div class="metric-field">
+        <label for="metric-name">Metric Used</label>
+        <input type="text" id="metric-name" placeholder="e.g. F1, Accuracy, ROUGE-1">
+      </div>
+    </div>
+
+    <div class="metric-row">
+      <div class="computed-value" id="ar-value">AR = &mdash;</div>
+    </div>
+
+    <div class="threshold-row">
+      <label for="ar-threshold">AR Threshold:</label>
+      <input type="range" id="ar-threshold" min="0.70" max="1.00" step="0.01" value="0.90">
+      <span class="threshold-val" id="ar-threshold-val">0.90</span>
+    </div>
+
+    <details class="latency-toggle">
+      <summary>Optional: Latency Data</summary>
+      <div class="latency-content">
+        <div class="metric-row">
+          <div class="metric-field">
+            <label for="slm-latency">SLM Latency (seconds)</label>
+            <input type="number" id="slm-latency" step="any" min="0" placeholder="e.g. 6.39">
+          </div>
+          <div class="metric-field">
+            <label for="cloud-latency">Cloud/Reference Latency (seconds)</label>
+            <input type="number" id="cloud-latency" step="any" min="0" placeholder="e.g. 29.12">
+          </div>
+          <div class="computed-value" id="le-value">LE = &mdash;</div>
+        </div>
+        <div class="threshold-row">
+          <label for="le-threshold">LE Threshold:</label>
+          <input type="range" id="le-threshold" min="-0.50" max="0.90" step="0.05" value="0.00">
+          <span class="threshold-val" id="le-threshold-val">0.00</span>
+        </div>
+        <p class="latency-note">LE = 1 &minus; (SLM latency / Cloud latency). Positive values mean the SLM is faster. Only 3 of 14 studies in the source manuscript reported inference latency.</p>
+      </div>
+    </details>
+  </section>
+
+  <!-- Step 3: Verdict -->
+  <section class="card verdict-card pending" id="verdict-card">
+    <div class="step-label">Step 3</div>
+    <h2>Deployment Verdict</h2>
+    <div class="verdict-header">
+      <span class="verdict-icon" id="verdict-icon">&mdash;</span>
+      <span class="verdict-title" id="verdict-title">Enter your scores to see the verdict</span>
+    </div>
+    <div class="verdict-metrics" id="verdict-metrics"></div>
+    <div class="verdict-explanation" id="verdict-explanation">
+      <p>Complete Steps 1 and 2 to receive a deployment recommendation.</p>
+    </div>
+  </section>
+
+  <!-- Visualization -->
+  <section class="card">
+    <h2>Your Task vs. Published Healthcare Benchmarks</h2>
+    <p class="description">Your task (dark triangle) plotted among 25 benchmarked task configurations from the manuscript. Blue = inside envelope, orange = outside. Hover for details.</p>
+    <div class="charts-row">
+      <div class="chart-scatter" style="position:relative">
+        <div class="chart-title">Accuracy Ratio vs. Task Complexity</div>
+        <svg id="scatter-svg" width="100%" preserveAspectRatio="xMidYMid meet"></svg>
+        <div class="scatter-tooltip" id="scatter-tooltip"></div>
+      </div>
+      <div class="chart-radar">
+        <div class="chart-title">Task Profile (r, k, o)</div>
+        <svg id="radar-svg" width="100%" preserveAspectRatio="xMidYMid meet"></svg>
+      </div>
+    </div>
+  </section>
+
+  <!-- Reference Table -->
+  <section class="card">
+    <details class="ref-table-toggle">
+      <summary>Reference: All 25 Benchmarked Configurations</summary>
+      <div class="ref-table-wrap">
+        <table class="ref-table">
+          <thead>
+            <tr>
+              <th data-col="task">Task</th>
+              <th data-col="source">Source</th>
+              <th>SLM</th>
+              <th>Reference</th>
+              <th>(r,k,o)</th>
+              <th data-col="sum">Sum</th>
+              <th>Metric</th>
+              <th>SLM Score</th>
+              <th>Ref Score</th>
+              <th data-col="ar">AR</th>
+              <th data-col="le">LE</th>
+              <th data-col="env">Env.</th>
+            </tr>
+          </thead>
+          <tbody id="ref-tbody"></tbody>
+        </table>
+      </div>
+    </details>
+  </section>
+
+</main>
+
+<footer>
+  <div class="container">
+    <p class="citation">Williams, H. (2026). FIT-SLM-HC: A Task&ndash;Technology Fit Framework for Identifying Tasks Suited to Small Language Models in Healthcare. Stony Brook University, Stony Brook, New York, USA.</p>
+    <p class="disclaimer">This tool implements the framework described in the manuscript. It does not replace full benchmarking, calibration, or safety assessment. Thresholds are governance defaults and should be set by each organization based on clinical risk tolerance.</p>
+    <p class="source-link">Live tool: <a href="https://hantswilliams.github.io/sbu-manuscript-llm-local/">hantswilliams.github.io/sbu-manuscript-llm-local</a> &middot; Source: <a href="https://github.com/hantswilliams/sbu-manuscript-llm-local/tree/main/app/healthcare">github.com/hantswilliams/sbu-manuscript-llm-local</a></p>
+  </div>
+</footer>
+
+<script src="data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

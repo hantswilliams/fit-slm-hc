@@ -1,0 +1,12 @@
+__pycache__/
+*.pyc
+.DS_Store
+# LaTeX build artifacts (compiled main.pdf IS committed)
+manuscript/*.aux
+manuscript/*.bbl
+manuscript/*.blg
+manuscript/*.log
+manuscript/*.out
+manuscript/*.fls
+manuscript/*.fdb_latexmk
+manuscript/*.synctex.gz

@@ -1,0 +1,542 @@
+/* FIT-SLM-HC Decision Support Tool */
+
+/* Valence-neutral zone palette (matches manuscript Figure 1):
+   blue = SLM zone, gray = borderline, orange = cloud zone.
+   Neither deployment path is "good" or "bad" — the old green/yellow/red
+   traffic-light scheme implied a value judgment the framework does not make.
+   Blue/orange is also the colorblind-safe pairing. Text-role variants
+   (--slm/--mid/--cloud) all pass WCAG AA on their paired light backgrounds. */
+
+:root {
+  --slm: #1d5fb0;
+  --slm-light: #eaf1fa;
+  --slm-fill: #B9D5F2;
+  --mid: #5f5f5a;
+  --mid-light: #f0f0ee;
+  --mid-fill: #E7E7E3;
+  --cloud: #b34a12;
+  --cloud-light: #fdeee4;
+  --cloud-fill: #F8CDB0;
+  --text: #1a1a2e;
+  --text-secondary: #555;
+  --bg: #f5f6f8;
+  --card: #ffffff;
+  --border: #dde1e6;
+  --accent: #1565c0;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  color: var(--text);
+  background: var(--bg);
+  line-height: 1.6;
+  font-size: 15px;
+}
+
+.container {
+  max-width: 880px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+/* Header */
+header {
+  background: var(--card);
+  border-bottom: 3px solid var(--accent);
+  padding: 32px 0 24px;
+  margin-bottom: 24px;
+}
+
+header h1 {
+  font-size: 1.7rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin-bottom: 4px;
+}
+
+header .subtitle {
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+  margin-bottom: 12px;
+}
+
+header .attribution {
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+}
+
+.about-toggle {
+  font-size: 0.85rem;
+  color: var(--accent);
+  cursor: pointer;
+  border: none;
+  background: none;
+  padding: 4px 0;
+  margin-top: 8px;
+  text-decoration: underline;
+}
+
+.about-content {
+  display: none;
+  margin-top: 10px;
+  padding: 12px 16px;
+  background: var(--bg);
+  border-radius: 6px;
+  font-size: 0.88rem;
+  line-height: 1.65;
+  color: var(--text-secondary);
+}
+
+.about-content.open { display: block; }
+
+/* Cards */
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 24px;
+  margin-bottom: 20px;
+}
+
+.card h2 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.card .step-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--accent);
+  margin-bottom: 2px;
+}
+
+.card p.description {
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+  margin-bottom: 16px;
+}
+
+/* Axis scoring */
+.axis-group {
+  margin-bottom: 20px;
+}
+
+.axis-group:last-of-type { margin-bottom: 0; }
+
+.axis-label {
+  font-weight: 600;
+  font-size: 0.92rem;
+  margin-bottom: 8px;
+}
+
+.axis-label span {
+  font-weight: 400;
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+}
+
+.axis-options {
+  display: flex;
+  gap: 8px;
+}
+
+.axis-option {
+  flex: 1;
+  position: relative;
+}
+
+.axis-option input[type="radio"] {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.axis-option label {
+  display: block;
+  padding: 10px 12px;
+  border: 2px solid var(--border);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+  font-size: 0.82rem;
+  line-height: 1.45;
+}
+
+.axis-option label:hover {
+  border-color: #aab;
+}
+
+.axis-option label .level {
+  font-weight: 700;
+  font-size: 0.95rem;
+  display: block;
+  margin-bottom: 2px;
+}
+
+.axis-option label .level-name {
+  font-weight: 600;
+  font-size: 0.82rem;
+  display: block;
+  margin-bottom: 2px;
+}
+
+.axis-option label .level-desc {
+  color: var(--text-secondary);
+  font-size: 0.78rem;
+}
+
+/* Selected states */
+.axis-option input:checked + label {
+  border-width: 2px;
+}
+
+.axis-option[data-level="1"] input:checked + label {
+  border-color: var(--slm);
+  background: var(--slm-light);
+}
+
+.axis-option[data-level="2"] input:checked + label {
+  border-color: var(--mid);
+  background: var(--mid-light);
+}
+
+.axis-option[data-level="3"] input:checked + label {
+  border-color: var(--cloud);
+  background: var(--cloud-light);
+}
+
+/* Axis sum display */
+.axis-sum {
+  margin-top: 16px;
+  padding: 10px 16px;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  text-align: center;
+  background: var(--bg);
+  border: 1px solid var(--border);
+}
+
+.axis-sum.low { background: var(--slm-light); border-color: var(--slm); color: var(--slm); }
+.axis-sum.mid { background: var(--mid-light); border-color: var(--mid); color: var(--mid); }
+.axis-sum.high { background: var(--cloud-light); border-color: var(--cloud); color: var(--cloud); }
+
+.scoring-note {
+  margin-top: 10px;
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  font-style: italic;
+}
+
+/* Metric inputs */
+.metric-row {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 12px;
+  align-items: flex-end;
+}
+
+.metric-field {
+  flex: 1;
+}
+
+.metric-field label {
+  display: block;
+  font-size: 0.82rem;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.metric-field input[type="number"],
+.metric-field input[type="text"] {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  font-size: 0.92rem;
+  font-family: inherit;
+}
+
+.metric-field input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px rgba(21, 101, 192, 0.15);
+}
+
+.computed-value {
+  padding: 8px 14px;
+  background: var(--bg);
+  border-radius: 5px;
+  font-weight: 600;
+  font-size: 1rem;
+  text-align: center;
+  min-width: 110px;
+  border: 1px solid var(--border);
+}
+
+.threshold-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.threshold-row label {
+  font-size: 0.82rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.threshold-row input[type="range"] {
+  flex: 1;
+  max-width: 200px;
+}
+
+.threshold-row .threshold-val {
+  font-weight: 600;
+  min-width: 36px;
+  font-size: 0.92rem;
+}
+
+/* Latency toggle */
+.latency-toggle {
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+
+.latency-toggle summary {
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--accent);
+  list-style: none;
+  user-select: none;
+}
+
+.latency-toggle summary::-webkit-details-marker { display: none; }
+
+.latency-toggle summary::before {
+  content: "\25B6\00a0";
+  font-size: 0.7rem;
+  transition: transform 0.15s;
+  display: inline-block;
+}
+
+.latency-toggle[open] summary::before {
+  transform: rotate(90deg);
+}
+
+.latency-content {
+  margin-top: 12px;
+}
+
+.latency-note {
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  margin-top: 6px;
+  font-style: italic;
+}
+
+/* Verdict */
+.verdict-card {
+  border-left-width: 5px;
+  border-left-style: solid;
+  transition: border-color 0.2s, background 0.2s;
+}
+
+.verdict-card.inside {
+  border-left-color: var(--slm);
+  background: var(--slm-light);
+}
+
+.verdict-card.outside {
+  border-left-color: var(--cloud);
+  background: var(--cloud-light);
+}
+
+.verdict-card.borderline {
+  border-left-color: var(--mid);
+  background: var(--mid-light);
+}
+
+.verdict-card.pending {
+  border-left-color: var(--border);
+  background: var(--bg);
+}
+
+.verdict-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.verdict-icon {
+  font-size: 1.6rem;
+  line-height: 1;
+}
+
+.verdict-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+}
+
+.verdict-metrics {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+}
+
+.verdict-metric {
+  font-size: 0.88rem;
+}
+
+.verdict-metric strong {
+  font-size: 1.05rem;
+}
+
+.verdict-explanation {
+  font-size: 0.88rem;
+  line-height: 1.6;
+  color: var(--text-secondary);
+}
+
+.verdict-explanation p {
+  margin-bottom: 8px;
+}
+
+.verdict-explanation p:last-child { margin-bottom: 0; }
+
+/* Charts section */
+.charts-row {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+}
+
+.chart-scatter { flex: 2; }
+.chart-radar { flex: 1; min-width: 240px; }
+
+.chart-title {
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+svg text {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+.scatter-tooltip {
+  position: absolute;
+  background: rgba(26, 26, 46, 0.92);
+  color: #fff;
+  padding: 8px 12px;
+  border-radius: 5px;
+  font-size: 0.78rem;
+  line-height: 1.5;
+  pointer-events: none;
+  display: none;
+  max-width: 260px;
+  z-index: 10;
+}
+
+/* Reference table */
+.ref-table-toggle summary {
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--accent);
+  list-style: none;
+  user-select: none;
+  padding: 8px 0;
+}
+
+.ref-table-toggle summary::-webkit-details-marker { display: none; }
+
+.ref-table-toggle summary::before {
+  content: "\25B6\00a0";
+  font-size: 0.7rem;
+  display: inline-block;
+  transition: transform 0.15s;
+}
+
+.ref-table-toggle[open] summary::before {
+  transform: rotate(90deg);
+}
+
+.ref-table-wrap {
+  overflow-x: auto;
+  margin-top: 12px;
+}
+
+.ref-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.78rem;
+}
+
+.ref-table th {
+  background: var(--bg);
+  padding: 6px 8px;
+  text-align: left;
+  font-weight: 600;
+  border-bottom: 2px solid var(--border);
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+}
+
+.ref-table th:hover { background: #e8eaed; }
+
+.ref-table td {
+  padding: 5px 8px;
+  border-bottom: 1px solid var(--border);
+}
+
+.ref-table tr.envelope-yes td:first-child { border-left: 3px solid var(--slm); }
+.ref-table tr.envelope-no td:first-child { border-left: 3px solid var(--cloud); }
+
+.ref-table .note-marker {
+  display: inline-block;
+  margin-left: 4px;
+  color: var(--text-secondary);
+  cursor: help;
+  font-size: 0.9em;
+}
+
+/* Footer */
+footer {
+  margin-top: 32px;
+  padding: 24px 0;
+  border-top: 1px solid var(--border);
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  line-height: 1.7;
+}
+
+footer .citation {
+  font-style: italic;
+  margin-bottom: 6px;
+}
+
+footer .disclaimer {
+  margin-top: 8px;
+}
+
+/* Responsive */
+@media (max-width: 720px) {
+  .axis-options { flex-direction: column; }
+  .metric-row { flex-direction: column; }
+  .charts-row { flex-direction: column; }
+  .chart-radar { min-width: auto; }
+  header h1 { font-size: 1.3rem; }
+}

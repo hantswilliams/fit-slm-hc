@@ -1,0 +1,24 @@
+task_id,task_name,axis_sum,ar,is_variant,adaptation_symmetry,inside_at_0.80,inside_at_0.90,inside_at_0.95
+T01,Report labeling,3,1.23,0,slm_favored,1,1,1
+T02,Text classification,3,1.27,0,slm_favored,1,1,1
+T03,Information extraction,3,1.09,0,slm_favored,1,1,1
+T04,Stress detection,3,1.03,0,symmetric,1,1,1
+T05,DICOM harmonization,4,1.11,0,slm_favored,1,1,1
+T06,Clinical NER,4,1.33,0,slm_favored,1,1,1
+T07,Pathology IE,4,0.94,0,symmetric,1,1,0
+T08,Pathology IE (4-bit variant),4,0.71,1,symmetric,0,0,0
+T09,Clinical report IE,4,1.05,0,slm_favored,1,1,1
+T10,Biomedical literature CLS (binary),4,1.02,0,symmetric,1,1,1
+T11,Depression detection,4,0.95,0,symmetric,1,1,1
+T12,Suicide detection,4,0.83,0,symmetric,1,0,0
+T13,Impression generation,5,1.2,0,slm_favored,1,1,1
+T14,Differential diagnosis (DDXPlus),5,1.68,0,slm_favored,1,1,1
+T15,Treatment planning,5,1.16,0,slm_favored,1,1,1
+T16,ICD-10 coding,5,1.03,0,symmetric,1,1,1
+T17,Radiology QA,5,1.19,0,slm_favored,1,1,1
+T18,DDI prediction,5,0.99,0,slm_favored,1,1,1
+T19,Biomedical literature CLS (3-class),5,0.78,0,symmetric,0,0,0
+T20,Clinical triage,6,1.05,0,slm_favored,1,1,1
+T21,Clinical IE composite (28 tasks),,0.77,0,symmetric,0,0,0
+T22,Medical exam QA,7,0.84,0,slm_favored,1,0,0
+T23,Medical QA (USMLE),7,0.74,0,slm_favored,0,0,0
