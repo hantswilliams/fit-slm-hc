@@ -72,6 +72,11 @@ cd manuscript/figures && python3 figure1_schematic.py && python3 figure2_scatter
 `manuscript/verify_bib.py` checks every DOI/arXiv entry in `references.bib`
 against Crossref/arXiv (network required).
 
+`manuscript/main.docx` is a Word working copy for tracked-changes review,
+generated from the LaTeX source (math rendered as plain text; IEEE-numbered
+citations). The LaTeX source and `main.pdf` are canonical; edits accepted in
+the Word copy should be carried back into `main.tex`.
+
 ## License
 
 Code and data in this repository are released under the [MIT License](LICENSE).
