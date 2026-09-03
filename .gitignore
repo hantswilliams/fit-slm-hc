@@ -1,6 +1,7 @@
 __pycache__/
 *.pyc
 .DS_Store
+.vscode
 # LaTeX build artifacts (compiled main.pdf IS committed)
 manuscript/*.aux
 manuscript/*.bbl

@@ -1,7 +1,8 @@
 """Figure 2 (aug28 revision): AR vs axis sum for the 22 unique snapshot tasks.
 
 Reads analysis/data/tasks_master.csv so the figure cannot drift from the table.
-Shape+color encode adaptation symmetry (redundant for print/CVD); the 4-bit
+Shape+tone encode adaptation symmetry (black circles vs. grey squares; the
+figure uses no color, for journals that charge for color figures); the 4-bit
 quantization variant of Pathology IE is shown hollow, linked to its parent.
 Selective direct labels only. Thresholds are governance settings, drawn as
 reference lines, with AR = 1.0 as parity.
@@ -10,8 +11,8 @@ import csv
 from collections import defaultdict
 import matplotlib.pyplot as plt
 
-INK="#14181c"; MUT="#5a6672"; FAINT="#c9d1d8"; GRID="#e4e8ec"
-BLUE="#0072B2"; ORANGE="#D55E00"   # validated pair (CVD dE 21.9, normal 31.2)
+INK="#171717"; MUT="#666666"; FAINT="#cfcfcf"; GRID="#e6e6e6"
+BLACK="#171717"; GREY="#8c8c8c"   # grayscale-only palette: black vs. mid-grey (no color)
 
 rows = list(csv.DictReader(open("tasks_master.csv")))
 tasks = [r for r in rows if r["axis_sum"] != ""]
@@ -37,17 +38,17 @@ ax.axhline(0.90, ls=(0,(4,3)), lw=1.2, color=MUT, zorder=1)
 ax.axhline(1.00, lw=0.9, color=GRID, zorder=1)
 for y, lab, c in ((0.80,"AR 0.80 (lenient)",FAINT),(0.90,"AR 0.90 (default)",MUT),
                   (0.95,"AR 0.95 (strict)",FAINT),(1.00,"parity",FAINT)):
-    ax.text(7.62, y, lab, fontsize=7.2, color=MUT if y==0.90 else "#8b959e",
+    ax.text(7.62, y, lab, fontsize=7.2, color=MUT if y==0.90 else "#919191",
             va="center", ha="left")
 
 # group means as short gray bars
 for s, g in groups.items():
     m = sum(float(r["ar"]) for r in g)/len(g)
-    ax.plot([s-0.30, s+0.30], [m, m], lw=2.2, color="#9aa5b0", alpha=0.85,
+    ax.plot([s-0.30, s+0.30], [m, m], lw=2.2, color="#a3a3a3", alpha=0.85,
             solid_capstyle="round", zorder=2)
 
-M = {"slm_favored": dict(marker="o", color=BLUE,   label="SLM-favored adaptation"),
-     "symmetric":   dict(marker="s", color=ORANGE, label="Symmetric adaptation")}
+M = {"slm_favored": dict(marker="o", color=BLACK, label="SLM-favored adaptation"),
+     "symmetric":   dict(marker="s", color=GREY,  label="Symmetric adaptation")}
 seen = set()
 for r in uniq:
     st = r["adaptation_symmetry"]; sp = M[st]
@@ -59,10 +60,10 @@ for r in uniq:
 # 4-bit variant: hollow, linked to its parent (T07)
 for r in var:
     x = pos["T07"]
-    ax.plot([x, x], [float(r["ar"])+0.012, 0.938-0.012], lw=0.9, color=ORANGE,
-            alpha=0.55, zorder=3)
+    ax.plot([x, x], [float(r["ar"])+0.012, 0.938-0.012], lw=0.9, color=MUT,
+            ls=(0,(2,2)), alpha=0.9, zorder=3)
     ax.scatter(x, float(r["ar"]), s=46, marker="s", facecolor="white",
-               edgecolor=ORANGE, linewidth=1.4, zorder=4, label="4-bit variant of Pathology IE")
+               edgecolor=BLACK, linewidth=1.4, zorder=4, label="4-bit variant of Pathology IE")
 
 LABELS = {"T07": ("Pathology IE (Vignette A)", (10, 4)),
           "T08": ("4-bit", (10, -2)),

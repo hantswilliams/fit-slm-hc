@@ -4,11 +4,14 @@ Replaces the previous Figure 1, which drew isotropic zone bands labeled with
 AR thresholds (review finding F11). This version shows only the task-side
 coordinate system: three ordinal axes, levels 1-3. The envelope is measured,
 not drawn.
+
+Sept 2026: rendered in black and grey only (no color), for journals that
+charge for color figures.
 """
 import matplotlib.pyplot as plt
 import numpy as np
 
-INK = "#14181c"; MUT = "#5a6672"; FAINT = "#b9c2ca"; ACC = "#0072B2"
+INK = "#171717"; MUT = "#666666"; FAINT = "#bfbfbf"; ACC = INK   # grayscale-only palette (no color)
 
 AXES = [
     (90,  "Reasoning\nComplexity ($r$)", ["Extraction", "Interpretation", "Synthesis"]),
