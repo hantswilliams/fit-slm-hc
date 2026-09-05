@@ -48,11 +48,8 @@ for ang, name, levels in AXES:
         ax.text(nr*ux, nr*uy - 0.72, sub, ha="center", va="center",
                 fontsize=7.8, color=MUT, zorder=4)
 
-ax.text(0, -4.05,
-        "A task is a point $(r,k,o)$ in this ordinal space; level 1 is the most constrained on each axis.\n"
-        "Whether a given system covers a task is measured (AR and LE against a named reference), not read off the diagram.",
-        ha="center", fontsize=8.6, color=INK)
-ax.set_xlim(-5.0, 5.0); ax.set_ylim(-4.6, 4.5)
+# JMIR: no notes embedded in the image; this explanatory text lives in the figure caption instead.
+ax.set_xlim(-5.0, 5.0); ax.set_ylim(-3.55, 4.5)
 fig.tight_layout()
 for ext in ("pdf", "png"):
     fig.savefig(f"figure1_axes_schematic.{ext}", dpi=300, bbox_inches="tight")

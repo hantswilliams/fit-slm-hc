@@ -93,8 +93,7 @@ ax.set_axisbelow(True)
 leg = ax.legend(loc="upper right", fontsize=7.6, frameon=False,
                 handletextpad=0.4, borderaxespad=0.2)
 ax.plot([], [])  # no-op
-ax.text(2.5, 1.815, "Short gray bars mark the mean AR at each axis sum.",
-        fontsize=7.4, color=MUT, ha="left")
+# JMIR: no caption text embedded in the image; the gray-bar explanation lives in the figure caption.
 fig.tight_layout()
 for ext in ("pdf","png"):
     fig.savefig(f"figure2_ar_scatter.{ext}", dpi=300, bbox_inches="tight")
